@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Porosia u Krye me Sukses{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Mesazhi i suksesit -->
+            <div class="card shadow-sm text-center mb-4">
+                <div class="card-body">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success fa-5x"></i>
+                    </div>
+                    <h2 class="mb-3">Faleminderit për Porosinë Tuaj!</h2>
+                    <p class="lead mb-0">
+                        Porosia juaj me numër <strong>{{ order.order_number }}</strong> u krye me sukses.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Detajet e porosisë -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Detajet e Porosisë
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Informacioni i porosisë -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-success mb-3">Informacion i Porosisë</h6>
+                            <p class="mb-1">
+                                <strong>Numri i Porosisë:</strong><br>
+                                {{ order.order_number }}
+                            </p>
+                            <p class="mb-1">
+                                <strong>Data:</strong><br>
+                                {{ order.created_at|date:"d/m/Y H:i" }}
+                            </p>
+                            <p class="mb-1">
+                                <strong>Statusi:</strong><br>
+                                <span class="badge bg-warning">{{ order.get_status_display }}</span>
+                            </p>
+                            <p class="mb-0">
+                                <strong>Metoda e Pagesës:</strong><br>
+                                {{ order.get_payment_method_display }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-success mb-3">Adresa e Dorëzimit</h6>
+                            <p class="mb-1">
+                                <strong>Adresa:</strong><br>
+                                {{ order.shipping_address }}
+                            </p>
+                            <p class="mb-1">
+                                <strong>Qyteti:</strong><br>
+                                {{ order.shipping_city }}
+                            </p>
+                            <p class="mb-0">
+                                <strong>Telefoni:</strong><br>
+                                {{ order.shipping_phone }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Produktet e porositura -->
+                    <h6 class="text-success mb-3">Produktet e Porositura</h6>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Produkti</th>
+                                    <th>Fermeri</th>
+                                    <th class="text-center">Sasia</th>
+                                    <th class="text-end">Çmimi</th>
+                                    <th class="text-end">Totali</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items.all %}
+                                    <tr>
+                                        <td>{{ item.product_name }}</td>
+                                        <td>{{ item.farmer.farm_name }}</td>
+                                        <td class="text-center">
+                                            {{ item.quantity }} {{ item.unit }}
+                                        </td>
+                                        <td class="text-end">{{ item.unit_price }} ALL</td>
+                                        <td class="text-end">{{ item.subtotal }} ALL</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4" class="text-end">
+                                        <strong>Nëntotali:</strong>
+                                    </td>
+                                    <td class="text-end">
+                                        {{ order.total_amount }} ALL
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4" class="text-end">
+                                        <strong>Transporti:</strong>
+                                    </td>
+                                    <td class="text-end text-success">Falas</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4" class="text-end">
+                                        <strong>Totali:</strong>
+                                    </td>
+                                    <td class="text-end">
+                                        <strong class="text-success">
+                                            {{ order.total_amount }} ALL
+                                        </strong>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hapat e ardhshëm -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Çfarë Ndodh Më Pas?</h5>
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3 mb-md-0">
+                            <div class="mb-2">
+                                <i class="fas fa-envelope fa-2x text-success"></i>
+                            </div>
+                            <h6>Konfirmimi me Email</h6>
+                            <p class="small text-muted mb-0">
+                                Do të merrni një email konfirmimi me detajet e porosisë.
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-center mb-3 mb-md-0">
+                            <div class="mb-2">
+                                <i class="fas fa-box fa-2x text-success"></i>
+                            </div>
+                            <h6>Përgatitja e Porosisë</h6>
+                            <p class="small text-muted mb-0">
+                                Fermerët do të përgatisin produktet për dorëzim.
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="mb-2">
+                                <i class="fas fa-truck fa-2x text-success"></i>
+                            </div>
+                            <h6>Dorëzimi</h6>
+                            <p class="small text-muted mb-0">
+                                Porosia do të dorëzohet brenda 24-48 orëve.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Butonat e veprimit -->
+            <div class="d-grid gap-2 d-md-flex justify-content-center">
+                <a href="{% url 'marketplace:order_list' %}" class="btn btn-success">
+                    <i class="fas fa-list me-2"></i>Shiko Porositë e Mia
+                </a>
+                <a href="{% url 'product:list' %}" class="btn btn-outline-success">
+                    <i class="fas fa-shopping-basket me-2"></i>Vazhdo Blerjet
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.table > :not(caption) > * > * {
+    padding: 1rem;
+}
+</style>
+{% endblock %}

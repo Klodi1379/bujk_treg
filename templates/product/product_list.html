@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Produktet Bujqësore - Platforma Bujqësore{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Sidebar për filtrat -->
+        <div class="col-lg-3">
+            <div class="card sticky-top" style="top: 1rem;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-filter me-2"></i>Filtro Produktet
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="searchForm">
+                        <!-- Kërkimi -->
+                        <div class="mb-3">
+                            {{ search_form.q|as_crispy_field }}
+                        </div>
+
+                        <!-- Kategoria -->
+                        <div class="mb-3">
+                            {{ search_form.category|as_crispy_field }}
+                        </div>
+
+                        <!-- Çmimi -->
+                        <div class="mb-3">
+                            <label class="form-label">Intervali i çmimit</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    {{ search_form.min_price }}
+                                </div>
+                                <div class="col-6">
+                                    {{ search_form.max_price }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filtrat shtesë -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ search_form.is_organic }}
+                                {{ search_form.is_organic.label_tag }}
+                            </div>
+                            <div class="form-check">
+                                {{ search_form.in_stock }}
+                                {{ search_form.in_stock.label_tag }}
+                            </div>
+                        </div>
+
+                        <!-- Renditja -->
+                        <div class="mb-3">
+                            {{ search_form.sort|as_crispy_field }}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-search me-2"></i>Apliko Filtrat
+                            </button>
+                            <a href="{% url 'product:list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-undo me-2"></i>Pastro Filtrat
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista e produkteve -->
+        <div class="col-lg-9">
+            <!-- Kategoritë e shpejta -->
+            <div class="mb-4">
+                <div class="row g-2">
+                    {% for category in categories %}
+                        <div class="col-auto">
+                            <a href="{% url 'product:category_products' category.slug %}" 
+                               class="btn btn-outline-success">
+                                {{ category.name }}
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Statistikat e kërkimit -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <p class="mb-0">
+                    <strong>{{ page_obj.paginator.count }}</strong> produkte u gjetën
+                    {% if request.GET.q %}
+                        për "<strong>{{ request.GET.q }}</strong>"
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Lista e produkteve -->
+            {% if products %}
+                <div class="row g-4">
+                    {% for product in products %}
+                        <div class="col-md-4">
+                            <div class="card h-100 product-card">
+                                {% if product.images.exists %}
+                                    <img src="{{ product.images.first.image.url }}" 
+                                         class="card-img-top"
+                                         alt="{{ product.name }}"
+                                         style="height: 200px; object-fit: cover;">
+                                {% else %}
+                                    <img src="{% static 'images/product-placeholder.jpg' %}" 
+                                         class="card-img-top"
+                                         alt="{{ product.name }}"
+                                         style="height: 200px; object-fit: cover;">
+                                {% endif %}
+                                
+                                <div class="card-body">
+                                    <h5 class="card-title mb-1">{{ product.name }}</h5>
+                                    <p class="text-muted small mb-2">
+                                        <i class="fas fa-user me-1"></i>{{ product.farmer.farm_name }}
+                                    </p>
+                                    
+                                    <div class="mb-2">
+                                        {% if product.is_organic %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-leaf me-1"></i>Organik
+                                            </span>
+                                        {% endif %}
+                                        {% if product.is_featured %}
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-star me-1"></i>I Veçantë
+                                            </span>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            {% if product.discount_price %}
+                                                <span class="h5 text-success mb-0">
+                                                    {{ product.discount_price }} ALL
+                                                </span>
+                                                <small class="text-muted text-decoration-line-through">
+                                                    {{ product.price }} ALL
+                                                </small>
+                                            {% else %}
+                                                <span class="h5 text-success mb-0">
+                                                    {{ product.price }} ALL
+                                                </span>
+                                            {% endif %}
+                                            <small class="text-muted">/ {{ product.get_unit_display }}</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-muted d-block">Min. porosi:</small>
+                                            <small>{{ product.minimum_order }} {{ product.get_unit_display }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <div class="d-grid">
+                                        <a href="{% url 'product:detail' product.slug %}" 
+                                           class="btn btn-outline-success">
+                                            <i class="fas fa-info-circle me-2"></i>Detaje
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Paginimi -->
+                {% if is_paginated %}
+                    <nav class="mt-4" aria-label="Navigimi i faqeve">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" 
+                                       href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" 
+                                       href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            <li class="page-item disabled">
+                                <span class="page-link">
+                                    Faqja {{ page_obj.number }} nga {{ page_obj.paginator.num_pages }}
+                                </span>
+                            </li>
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" 
+                                       href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" 
+                                       href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-box-open fa-4x text-muted"></i>
+                    </div>
+                    <h4>Nuk u gjetën produkte</h4>
+                    <p class="text-muted">
+                        Nuk ka produkte që përputhen me kriteret e kërkimit.
+                        Provoni të ndryshoni filtrat ose të pastroni kërkimin.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Përdor AJAX për të përditësuar listën e produkteve pa ringarkim të faqes
+    const form = document.getElementById('searchForm');
+    const minPrice = form.querySelector('[name="min_price"]');
+    const maxPrice = form.querySelector('[name="max_price"]');
+    
+    // Validimi i çmimit
+    function validatePrices() {
+        if (minPrice.value && maxPrice.value) {
+            if (parseFloat(minPrice.value) > parseFloat(maxPrice.value)) {
+                alert('Çmimi minimal nuk mund të jetë më i madh se çmimi maksimal!');
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    form.addEventListener('submit', function(e) {
+        if (!validatePrices()) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

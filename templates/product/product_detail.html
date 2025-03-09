@@ -1,0 +1,347 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ product.name }} - {{ product.farmer.farm_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row g-4">
+        <!-- Galeria dhe informacionet kryesore -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <!-- Galeria e imazheve -->
+                    <div class="product-gallery mb-4">
+                        <div class="row">
+                            <div class="col-md-9">
+                                {% if product.images.exists %}
+                                    <img id="mainImage" src="{{ product.images.first.image.url }}" 
+                                         class="img-fluid rounded" 
+                                         alt="{{ product.name }}"
+                                         style="width: 100%; height: 400px; object-fit: cover;">
+                                {% else %}
+                                    <img src="{% static 'images/product-placeholder.jpg' %}" 
+                                         class="img-fluid rounded"
+                                         alt="{{ product.name }}"
+                                         style="width: 100%; height: 400px; object-fit: cover;">
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <div class="d-flex flex-md-column gap-2">
+                                    {% for image in product.images.all %}
+                                        <img src="{{ image.image.url }}" 
+                                             class="thumbnail-image img-fluid rounded cursor-pointer"
+                                             alt="{{ image.alt_text }}"
+                                             style="height: 80px; object-fit: cover;"
+                                             onclick="changeMainImage(this.src)">
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informacionet e produktit -->
+                    <h1 class="mb-3">{{ product.name }}</h1>
+                    
+                    <!-- Etiketat -->
+                    <div class="mb-3">
+                        {% if product.is_organic %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-leaf me-1"></i>Organik
+                            </span>
+                        {% endif %}
+                        {% if product.is_featured %}
+                            <span class="badge bg-warning">
+                                <i class="fas fa-star me-1"></i>I Veçantë
+                            </span>
+                        {% endif %}
+                        <span class="badge bg-info">
+                            <i class="fas fa-tag me-1"></i>{{ product.category.name }}
+                        </span>
+                    </div>
+
+                    <!-- Çmimi dhe disponueshmëria -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="price-box">
+                                {% if product.discount_price %}
+                                    <h3 class="text-success mb-0">
+                                        {{ product.discount_price }} ALL
+                                        <small class="text-muted text-decoration-line-through">
+                                            {{ product.price }} ALL
+                                        </small>
+                                    </h3>
+                                    <div class="discount-badge">
+                                        <span class="badge bg-danger">
+                                            -{{ product.discount_percentage }}%
+                                        </span>
+                                    </div>
+                                {% else %}
+                                    <h3 class="text-success mb-0">
+                                        {{ product.price }} ALL
+                                    </h3>
+                                {% endif %}
+                                <small class="text-muted">për {{ product.get_unit_display }}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1">
+                                <strong>Sasia minimale e porosisë:</strong>
+                                {{ product.minimum_order }} {{ product.get_unit_display }}
+                            </p>
+                            <p class="mb-0">
+                                <strong>Disponueshmëria:</strong>
+                                {% if product.is_in_stock %}
+                                    <span class="text-success">
+                                        <i class="fas fa-check-circle me-1"></i>Në gjendje
+                                    </span>
+                                {% else %}
+                                    <span class="text-danger">
+                                        <i class="fas fa-times-circle me-1"></i>Nuk ka në gjendje
+                                    </span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Përshkrimi -->
+                    <div class="mb-4">
+                        <h5>Përshkrimi i Produktit</h5>
+                        <p>{{ product.description|linebreaks }}</p>
+                    </div>
+
+                    <!-- Informacione shtesë -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            {% if product.harvest_date %}
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-calendar me-2"></i>Data e vjeljes:</strong>
+                                    {{ product.harvest_date }}
+                                </p>
+                            {% endif %}
+                            {% if product.expiry_date %}
+                                <p class="mb-0">
+                                    <strong><i class="fas fa-clock me-2"></i>Data e skadencës:</strong>
+                                    {{ product.expiry_date }}
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Butonat e veprimit -->
+                    <form method="post" action="{% url 'marketplace:add_to_cart' product.slug %}">
+                        {% csrf_token %}
+                        {{ add_to_cart_form|crispy }}
+                        <div class="d-grid gap-2 d-md-flex">
+                            <button class="btn btn-success btn-lg flex-grow-1" type="submit">
+                                <i class="fas fa-shopping-cart me-2"></i>Shto në Shportë
+                            </button>
+                            <button class="btn btn-outline-success btn-lg">
+                                <i class="fas fa-heart me-2"></i>Shto në Listë
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Informacionet e fermerit -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user me-2"></i>Informacione për Fermerin
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        {% if product.farmer.profile_image %}
+                            <img src="{{ product.farmer.profile_image.url }}" 
+                                 class="rounded-circle me-3"
+                                 alt="{{ product.farmer.farm_name }}"
+                                 style="width: 60px; height: 60px; object-fit: cover;">
+                        {% endif %}
+                        <div>
+                            <h5 class="mb-1">{{ product.farmer.farm_name }}</h5>
+                            {% if product.farmer.is_verified %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle me-1"></i>Fermer i Verifikuar
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <p class="mb-3">{{ product.farmer.farm_description|truncatewords:30 }}</p>
+
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'farmer:profile_detail' product.farmer.pk %}" 
+                           class="btn btn-outline-success">
+                            <i class="fas fa-farm me-2"></i>Shiko Profilin e Fermerit
+                        </a>
+                        <button class="btn btn-outline-primary">
+                            <i class="fas fa-envelope me-2"></i>Kontakto Fermerin
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vlerësimet -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-star me-2"></i>Vlerësimet
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if reviews %}
+                        {% for review in reviews %}
+                            <div class="review-item {% if not forloop.last %}border-bottom mb-3 pb-3{% endif %}">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h6 class="mb-0">{{ review.user.get_full_name }}</h6>
+                                        <small class="text-muted">{{ review.created_at|date }}</small>
+                                    </div>
+                                    <div class="rating">
+                                        {% for i in "12345"|make_list %}
+                                            {% if forloop.counter <= review.rating %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-warning"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <p class="mb-0">{{ review.comment }}</p>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center mb-3">Ky produkt nuk ka vlerësime ende.</p>
+                    {% endif %}
+
+                    {% if user.is_authenticated %}
+                        <form method="post" action="{% url 'product:add_review' product.slug %}" class="mt-3">
+                            {% csrf_token %}
+                            {{ review_form|crispy }}
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-star me-2"></i>Shto Vlerësim
+                                </button>
+                            </div>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Pyetje dhe përgjigje -->
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-question-circle me-2"></i>Pyetje dhe Përgjigje
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if questions %}
+                        {% for question in questions %}
+                            <div class="question-item {% if not forloop.last %}border-bottom mb-3 pb-3{% endif %}">
+                                <div class="mb-2">
+                                    <h6 class="mb-1">{{ question.user.get_full_name }}</h6>
+                                    <small class="text-muted">{{ question.asked_at|date }}</small>
+                                </div>
+                                <p class="mb-2">{{ question.question }}</p>
+                                {% if question.answer %}
+                                    <div class="answer bg-light p-3 rounded">
+                                        <small class="text-muted">Përgjigjur nga {{ question.answered_by.get_full_name }}</small>
+                                        <p class="mb-0">{{ question.answer }}</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center mb-3">Nuk ka pyetje për këtë produkt.</p>
+                    {% endif %}
+
+                    {% if user.is_authenticated %}
+                        <form method="post" action="{% url 'product:add_question' product.slug %}" class="mt-3">
+                            {% csrf_token %}
+                            {{ question_form|crispy }}
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-question me-2"></i>Bëj Pyetje
+                                </button>
+                            </div>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Produktet e ngjashme -->
+    {% if related_products %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <h3 class="mb-4">Produkte të Ngjashme</h3>
+                <div class="row g-4">
+                    {% for related in related_products %}
+                        <div class="col-md-3">
+                            <div class="card h-100">
+                                {% if related.images.exists %}
+                                    <img src="{{ related.images.first.image.url }}"
+                                         class="card-img-top"
+                                         alt="{{ related.name }}"
+                                         style="height: 200px; object-fit: cover;">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ related.name }}</h5>
+                                    <p class="card-text text-success">
+                                        {{ related.price }} ALL / {{ related.get_unit_display }}
+                                    </p>
+                                    <div class="d-grid">
+                                        <a href="{% url 'product:detail' related.slug %}" 
+                                           class="btn btn-outline-success">
+                                            Shiko Detaje
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function changeMainImage(src) {
+    document.getElementById('mainImage').src = src;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Validimi i formës së vlerësimit
+    const reviewForm = document.querySelector('form[action*="add_review"]');
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', function(e) {
+            const rating = reviewForm.querySelector('[name="rating"]');
+            const comment = reviewForm.querySelector('[name="comment"]');
+            
+            if (!rating.value) {
+                e.preventDefault();
+                alert('Ju lutem zgjidhni një vlerësim nga 1 deri në 5.');
+                return;
+            }
+            
+            if (!comment.value.trim()) {
+                e.preventDefault();
+                alert('Ju lutem shkruani një koment për produktin.');
+                return;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

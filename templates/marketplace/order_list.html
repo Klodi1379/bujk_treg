@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Porositë e Mia{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-sm-flex justify-content-between align-items-center mb-4">
+                <h1 class="mb-sm-0">
+                    <i class="fas fa-shopping-bag text-success me-2"></i>Porositë e Mia
+                </h1>
+                <div>
+                    <a href="{% url 'product:list' %}" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>Porosi e Re
+                    </a>
+                </div>
+            </div>
+
+            {% if orders %}
+                <!-- Filtrat -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <form method="get" class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Statusi</label>
+                                <select name="status" class="form-select">
+                                    <option value="">Të gjitha</option>
+                                    {% for status, label in order_status_choices %}
+                                        <option value="{{ status }}" 
+                                                {% if request.GET.status == status %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Data nga</label>
+                                <input type="date" name="date_from" class="form-control"
+                                       value="{{ request.GET.date_from }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Data deri</label>
+                                <input type="date" name="date_to" class="form-control"
+                                       value="{{ request.GET.date_to }}">
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-filter me-2"></i>Filtro
+                                </button>
+                                <a href="{% url 'marketplace:order_list' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>Pastro
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Lista e porosive -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Numri i Porosisë</th>
+                                        <th>Data</th>
+                                        <th>Statusi</th>
+                                        <th class="text-end">Totali</th>
+                                        <th>Metoda e Pagesës</th>
+                                        <th class="text-center">Veprime</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in orders %}
+                                        <tr>
+                                            <td>
+                                                <a href="{% url 'marketplace:order_detail' order.pk %}" 
+                                                   class="text-decoration-none">
+                                                    {{ order.order_number }}
+                                                </a>
+                                            </td>
+                                            <td>{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                                            <td>
+                                                {% if order.status == 'pending' %}
+                                                    <span class="badge bg-warning">{{ order.get_status_display }}</span>
+                                                {% elif order.status == 'confirmed' %}
+                                                    <span class="badge bg-info">{{ order.get_status_display }}</span>
+                                                {% elif order.status == 'processing' %}
+                                                    <span class="badge bg-primary">{{ order.get_status_display }}</span>
+                                                {% elif order.status == 'shipping' %}
+                                                    <span class="badge bg-secondary">{{ order.get_status_display }}</span>
+                                                {% elif order.status == 'delivered' %}
+                                                    <span class="badge bg-success">{{ order.get_status_display }}</span>
+                                                {% elif order.status == 'cancelled' %}
+                                                    <span class="badge bg-danger">{{ order.get_status_display }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-end">{{ order.total_amount }} ALL</td>
+                                            <td>{{ order.get_payment_method_display }}</td>
+                                            <td class="text-center">
+                                                <a href="{% url 'marketplace:order_detail' order.pk %}" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye me-1"></i>Detaje
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paginimi -->
+                {% if is_paginated %}
+                    <nav class="mt-4" aria-label="Navigimi i faqeve">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            <li class="page-item disabled">
+                                <span class="page-link">
+                                    Faqja {{ page_obj.number }} nga {{ page_obj.paginator.num_pages }}
+                                </span>
+                            </li>
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <!-- Nuk ka porosi -->
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-shopping-bag fa-4x text-muted"></i>
+                    </div>
+                    <h4>Nuk keni bërë ende asnjë porosi</h4>
+                    <p class="text-muted mb-4">
+                        Eksploroni produktet tona dhe bëni porosinë tuaj të parë!
+                    </p>
+                    <a href="{% url 'product:list' %}" class="btn btn-success">
+                        <i class="fas fa-shopping-basket me-2"></i>Shiko Produktet
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Përditëso formën kur ndryshon statusi
+    const statusSelect = document.querySelector('select[name="status"]');
+    if (statusSelect) {
+        statusSelect.addEventListener('change', function() {
+            this.form.submit();
+        });
+    }
+
+    // Validimi i datave
+    const dateFrom = document.querySelector('input[name="date_from"]');
+    const dateTo = document.querySelector('input[name="date_to"]');
+    
+    if (dateFrom && dateTo) {
+        dateFrom.addEventListener('change', function() {
+            if (dateTo.value && this.value > dateTo.value) {
+                alert('Data fillestare nuk mund të jetë pas datës përfundimtare!');
+                this.value = '';
+            }
+        });
+        
+        dateTo.addEventListener('change', function() {
+            if (dateFrom.value && this.value < dateFrom.value) {
+                alert('Data përfundimtare nuk mund të jetë para datës fillestare!');
+                this.value = '';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

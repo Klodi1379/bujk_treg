@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Transport Companies{% endblock %}
+
+{% block content %}
+  <h1>Transport Companies</h1>
+  <ul>
+    {% for company in transport_companies %}
+      <li>
+        <a href="{% url 'logistics:transport_company_detail' pk=company.pk %}">{{ company }}</a>
+      </li>
+    {% empty %}
+      <li>No transport companies found.</li>
+    {% endfor %}
+  </ul>
+  <a href="{% url 'logistics:transport_company_create' %}">Add Transport Company</a>
+{% endblock %}

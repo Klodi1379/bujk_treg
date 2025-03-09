@@ -1,0 +1,409 @@
+[
+  {
+    "model": "logistics.transportcompany",
+    "pk": 1,
+    "fields": {
+      "name": "AgriTrans",
+      "contact_person": "John Smith",
+      "contact_email": "john.smith@example.com",
+      "contact_phone": "123-456-7890",
+      "address": "123 Main St, Anytown",
+      "registration_number": "AT12345",
+      "tax_number": "TN98765",
+      "website": "https://www.example.com",
+      "is_active": true
+    }
+  },
+  {
+    "model": "logistics.warehouse",
+    "pk": 1,
+    "fields": {
+      "company": 1,
+      "name": "Main Warehouse",
+      "location": "Anytown",
+      "address": "456 Depot St, Anytown",
+      "capacity": 1000.0,
+      "current_utilization": 500.0,
+      "manager": "Jane Doe",
+      "contact_phone": "098-765-4321",
+      "is_active": true,
+      "temperature_controlled": false,
+      "security_level": "medium"
+    }
+  },
+  {
+    "model": "logistics.vehicle",
+    "pk": 1,
+    "fields": {
+      "company": 1,
+      "vehicle_type": "truck",
+      "plate_number": "ABC-123",
+      "model": "Generic Truck",
+      "year": 2020,
+      "capacity": 5000.0,
+      "availability": true,
+      "last_maintenance": "2025-01-01",
+      "next_maintenance": "2025-04-01",
+      "insurance_expiry": "2026-01-01",
+      "current_location": "Anytown"
+    }
+  },
+  {
+    "model": "farmer.farmlocation",
+    "pk": 1,
+    "fields": {
+      "address": "789 Farm St",
+      "city": "Farmville",
+      "region": "Central",
+      "country": "Shqipëri",
+      "latitude": 41.0000,
+      "longitude": 20.0000
+    }
+  },
+  {
+    "model": "farmer.cultivationmethod",
+    "pk": 1,
+    "fields": {
+      "name": "Organic",
+      "description": "Grown without synthetic pesticides or fertilizers"
+    }
+  },
+  {
+    "model": "farmer.crop",
+    "pk": 1,
+    "fields": {
+      "name": "Wheat",
+      "scientific_name": "Triticum aestivum",
+      "description": "A staple grain",
+      "growing_season": "Winter",
+      "image": ""
+    }
+  },
+  {
+    "model": "product.category",
+    "pk": 1,
+    "fields": {
+      "name": "Fruits",
+      "slug": "fruits",
+      "description": "Fresh fruits",
+      "parent": null,
+      "image": ""
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$Ybx5qk8jE1wVj9Jvhnl0iJ$WwRA4mOaQ/w+Xm0/A9y0dQ9j1/t+j2vPNheY46KZXwI=",
+      "is_superuser": false,
+      "username": "farmer1",
+      "first_name": "John",
+      "last_name": "Doe",
+      "email": "john.doe@example.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2025-03-08T23:00:00Z",
+      "last_login": null
+    }
+  },
+  {
+    "model": "farmer.farmerprofile",
+    "pk": 1,
+    "fields": {
+      "user": 1,
+      "farm_name": "Farmville Farms",
+      "farm_description": "A family farm",
+      "profile_image": null,
+      "phone_number": "123-456-7890",
+      "website": "",
+      "year_established": 2000,
+      "location": 1,
+      "total_land_area": 100.00,
+      "is_verified": true,
+      "is_active": true,
+      "registration_date": "2025-03-08T23:00:00Z",
+      "last_modified": "2025-03-08T23:00:00Z"
+    }
+  },
+  {
+    "model": "product.product",
+    "pk": 1,
+    "fields": {
+      "name": "Organic Apples",
+      "slug": "organic-apples",
+      "farmer": 1,
+      "category": 1,
+      "crop": 1,
+      "description": "Delicious organic apples",
+      "price": 2.50,
+      "discount_price": 2.00,
+      "unit": "kg",
+      "minimum_order": 0.5,
+      "stock": 100.0,
+      "availability": "in_stock",
+      "is_organic": true,
+      "is_featured": true,
+      "harvest_date": "2025-02-01",
+      "expiry_date": "2025-03-15",
+      "created_at": "2025-03-08T23:00:00Z",
+      "updated_at": "2025-03-08T23:00:00Z"
+    }
+  },
+  {
+    "model": "product.product",
+    "pk": 2,
+    "fields": {
+      "name": "Organic Bananas",
+      "slug": "organic-bananas",
+      "farmer": 1,
+      "category": 1,
+      "crop": 1,
+      "description": "Delicious organic bananas",
+      "price": 1.50,
+      "discount_price": 1.20,
+      "unit": "kg",
+      "minimum_order": 0.5,
+      "stock": 100.0,
+      "availability": "in_stock",
+      "is_organic": true,
+      "is_featured": true,
+      "harvest_date": "2025-02-01",
+      "expiry_date": "2025-03-15",
+      "created_at": "2025-03-08T23:00:00Z",
+      "updated_at": "2025-03-08T23:00:00Z"
+    }
+  },
+  {
+    "model": "product.product",
+    "pk": 3,
+    "fields": {
+      "name": "Organic Oranges",
+      "slug": "organic-oranges",
+      "farmer": 1,
+      "category": 1,
+      "crop": 1,
+      "description": "Delicious organic oranges",
+      "price": 2.00,
+      "discount_price": 1.80,
+      "unit": "kg",
+      "minimum_order": 0.5,
+      "stock": 100.0,
+      "availability": "in_stock",
+      "is_organic": true,
+      "is_featured": true,
+      "harvest_date": "2025-02-01",
+      "expiry_date": "2025-03-15",
+      "created_at": "2025-03-08T23:00:00Z",
+      "updated_at": "2025-03-08T23:00:00Z"
+    }
+  },
+  {
+    "model": "product.product",
+    "pk": 4,
+    "fields": {
+      "name": "Organic Strawberries",
+      "slug": "organic-strawberries",
+      "farmer": 1,
+      "category": 1,
+      "crop": 1,
+      "description": "Delicious organic strawberries",
+      "price": 3.00,
+      "discount_price": 2.50,
+      "unit": "kg",
+      "minimum_order": 0.5,
+      "stock": 100.0,
+      "availability": "in_stock",
+      "is_organic": true,
+      "is_featured": true,
+      "harvest_date": "2025-02-01",
+      "expiry_date": "2025-03-15",
+      "created_at": "2025-03-08T23:00:00Z",
+      "updated_at": "2025-03-08T23:00:00Z"
+    }
+  },
+  {
+    "model": "product.product",
+    "pk": 5,
+    "fields": {
+      "name": "Organic Blueberries",
+      "slug": "organic-blueberries",
+      "farmer": 1,
+      "category": 1,
+      "crop": 1,
+      "description": "Delicious organic blueberries",
+      "price": 4.00,
+      "discount_price": 3.50,
+      "unit": "kg",
+      "minimum_order": 0.5,
+      "stock": 100.0,
+      "availability": "in_stock",
+      "is_organic": true,
+      "is_featured": true,
+      "harvest_date": "2025-02-01",
+      "expiry_date": "2025-03-15",
+      "created_at": "2025-03-08T23:00:00Z",
+      "updated_at": "2025-03-08T23:00:00Z"
+    }
+  },
+  {
+    "model": "product.product",
+    "pk": 6,
+      "fields": {
+      "name": "Organic Raspberries",
+      "slug": "organic-raspberries",
+      "farmer": 1,
+      "category": 1,
+      "crop": 1,
+      "description": "Delicious organic raspberries",
+      "price": 4.50,
+      "discount_price": 4.00,
+      "unit": "kg",
+      "minimum_order": 0.5,
+      "stock": 100.0,
+      "availability": "in_stock",
+      "is_organic": true,
+      "is_featured": true,
+      "harvest_date": "2025-02-01",
+      "expiry_date": "2025-03-15",
+      "created_at": "2025-03-08T23:00:00Z",
+      "updated_at": "2025-03-08T23:00:00Z"
+    }
+  },
+  {
+    "model": "product.product",
+    "pk": 7,
+    "fields": {
+      "name": "Organic Peaches",
+      "slug": "organic-peaches",
+      "farmer": 1,
+      "category": 1,
+      "crop": 1,
+      "description": "Delicious organic peaches",
+      "price": 2.80,
+      "discount_price": 2.50,
+      "unit": "kg",
+      "minimum_order": 0.5,
+      "stock": 100.0,
+      "availability": "in_stock",
+      "is_organic": true,
+      "is_featured": true,
+      "harvest_date": "2025-02-01",
+      "expiry_date": "2025-03-15",
+      "created_at": "2025-03-08T23:00:00Z",
+      "updated_at": "2025-03-08T23:00:00Z"
+    }
+  },
+  {
+    "model": "product.product",
+    "pk": 8,
+    "fields": {
+      "name": "Organic Pears",
+      "slug": "organic-pears",
+      "farmer": 1,
+      "category": 1,
+      "crop": 1,
+      "description": "Delicious organic pears",
+      "price": 2.30,
+      "discount_price": 2.00,
+      "unit": "kg",
+      "minimum_order": 0.5,
+      "stock": 100.0,
+      "availability": "in_stock",
+      "is_organic": true,
+      "is_featured": true,
+      "harvest_date": "2025-02-01",
+      "expiry_date": "2025-03-15",
+      "created_at": "2025-03-08T23:00:00Z",
+      "updated_at": "2025-03-08T23:00:00Z"
+    }
+  },
+  {
+    "model": "product.product",
+    "pk": 9,
+    "fields": {
+      "name": "Organic Plums",
+      "slug": "organic-plums",
+      "farmer": 1,
+      "category": 1,
+      "crop": 1,
+      "description": "Delicious organic plums",
+      "price": 2.60,
+      "discount_price": 2.30,
+      "unit": "kg",
+      "minimum_order": 0.5,
+      "stock": 100.0,
+      "availability": "in_stock",
+      "is_organic": true,
+      "is_featured": true,
+      "harvest_date": "2025-02-01",
+      "expiry_date": "2025-03-15",
+      "created_at": "2025-03-08T23:00:00Z",
+      "updated_at": "2025-03-08T23:00:00Z"
+    }
+  },
+  {
+    "model": "marketplace.cart",
+    "pk": 1,
+    "fields": {
+      "user": 1,
+      "created_at": "2025-03-08T23:00:00Z",
+      "updated_at": "2025-03-08T23:00:00Z"
+    }
+  },
+  {
+    "model": "marketplace.cartitem",
+    "pk": 1,
+    "fields": {
+      "cart": 1,
+      "product": 1,
+      "quantity": 2.00,
+      "unit_price": 2.50,
+      "added_at": "2025-03-08T23:00:00Z"
+    }
+  },
+  {
+    "model": "marketplace.order",
+    "pk": 1,
+    "fields": {
+      "user": 1,
+      "order_number": "ORD000001",
+      "status": "pending",
+      "total_amount": 5.00,
+      "payment_method": "cash",
+      "shipping_address": "123 Main St",
+      "shipping_city": "Anytown",
+      "shipping_phone": "123-456-7890",
+      "notes": "",
+      "created_at": "2025-03-08T23:00:00Z",
+      "updated_at": "2025-03-08T23:00:00Z"
+    }
+  },
+  {
+    "model": "marketplace.orderitem",
+    "pk": 1,
+    "fields": {
+      "order": 1,
+      "product": 1,
+      "farmer": 1,
+      "product_name": "Organic Apples",
+      "quantity": 2.00,
+      "unit_price": 2.50,
+      "unit": "kg",
+      "subtotal": 5.00
+    }
+  },
+  {
+    "model": "marketplace.transaction",
+    "pk": 1,
+    "fields": {
+      "order": 1,
+      "amount": 5.00,
+      "status": "completed",
+      "transaction_id": "1234567890",
+      "payment_method": "cash",
+      "created_at": "2025-03-08T23:00:00Z",
+      "updated_at": "2025-03-08T23:00:00Z",
+      "notes": ""
+    }
+  }
+]

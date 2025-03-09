@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Fshi Kulturën - {{ object.crop.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-danger">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-exclamation-triangle text-danger fa-4x"></i>
+                    </div>
+                    
+                    <h2 class="card-title mb-4">Fshi Kulturën</h2>
+                    
+                    <p class="lead mb-4">
+                        A jeni i sigurt që dëshironi të fshini kulturën <strong>{{ object.crop.name }}</strong>?
+                    </p>
+
+                    <!-- Detajet e kulturës -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="row align-items-center mb-3">
+                                <div class="col-auto">
+                                    {% if object.crop.image %}
+                                        <img src="{{ object.crop.image.url }}" 
+                                             alt="{{ object.crop.name }}"
+                                             class="rounded"
+                                             style="width: 60px; height: 60px; object-fit: cover;">
+                                    {% endif %}
+                                </div>
+                                <div class="col text-start">
+                                    <h5 class="text-danger mb-1">{{ object.crop.name }}</h5>
+                                    {% if object.crop.scientific_name %}
+                                        <p class="text-muted mb-0">
+                                            <small>{{ object.crop.scientific_name }}</small>
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <p class="mb-2">
+                                        <strong>Sipërfaqja:</strong><br>
+                                        {{ object.land_area }} hektarë
+                                    </p>
+                                </div>
+                                <div class="col-6">
+                                    <p class="mb-2">
+                                        <strong>Metoda e kultivimit:</strong><br>
+                                        {{ object.cultivation_method.name }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {% if object.estimated_yield %}
+                                <p class="mb-0">
+                                    <strong>Rendimenti i përllogaritur:</strong><br>
+                                    {{ object.estimated_yield }} kg/ha
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Ky veprim nuk mund të zhbëhet! Fshirja e kësaj kulture do të fshijë gjithashtu:
+                        <ul class="text-start mb-0 mt-2">
+                            <li>Të gjithë regjistrat e prodhimit për këtë kulturë</li>
+                            <li>Të gjitha statistikat e lidhura me këtë kulturë</li>
+                            <li>Lidhjen me produktet e krijuara nga kjo kulturë</li>
+                        </ul>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="fas fa-trash me-2"></i>Po, Fshi Kulturën
+                            </button>
+                            <a href="{% url 'farmer:manage_crops' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Anullo
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

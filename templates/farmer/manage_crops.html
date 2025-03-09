@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Menaxho Kulturat - {{ farmer.farm_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Lista e kulturave -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-seedling me-2"></i>Kulturat në Kultivim
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if farmer_crops %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Kultura</th>
+                                        <th>Metoda</th>
+                                        <th>Sipërfaqja (ha)</th>
+                                        <th>Rendimenti (kg/ha)</th>
+                                        <th>Veprime</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for crop in farmer_crops %}
+                                        <tr>
+                                            <td class="d-flex align-items-center">
+                                                {% if crop.crop.image %}
+                                                    <img src="{{ crop.crop.image.url }}" 
+                                                         alt="{{ crop.crop.name }}"
+                                                         class="rounded me-2"
+                                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                                {% endif %}
+                                                <div>
+                                                    <strong>{{ crop.crop.name }}</strong>
+                                                    {% if crop.crop.scientific_name %}
+                                                        <br>
+                                                        <small class="text-muted">{{ crop.crop.scientific_name }}</small>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td>{{ crop.cultivation_method.name }}</td>
+                                            <td>{{ crop.land_area }}</td>
+                                            <td>{{ crop.estimated_yield|default:"-" }}</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a href="{% url 'farmer:update_crop' crop.pk %}" 
+                                                       class="btn btn-sm btn-outline-success">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="{% url 'farmer:delete_crop' crop.pk %}" 
+                                                       class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <p class="text-muted mb-0">Nuk keni regjistruar asnjë kulturë ende.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Statistikat -->
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Statistikat e Kulturave
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 text-center">
+                                <h6 class="text-muted mb-2">Kultura Totale</h6>
+                                <h3 class="mb-0">{{ farmer_crops|length }}</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 text-center">
+                                <h6 class="text-muted mb-2">Sipërfaqja Totale</h6>
+                                <h3 class="mb-0">{{ total_area|floatformat:2 }} ha</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 text-center">
+                                <h6 class="text-muted mb-2">Metoda të Ndryshme</h6>
+                                <h3 class="mb-0">{{ unique_methods }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulari për shtim kulture -->
+        <div class="col-lg-4">
+            <div class="card sticky-top" style="top: 1rem;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-plus me-2"></i>Shto Kulturë të Re
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="crop-form">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-2"></i>Ruaj Kulturën
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validimi i formës
+    const form = document.querySelector('.crop-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const landArea = form.querySelector('[name="land_area"]');
+            const estimatedYield = form.querySelector('[name="estimated_yield"]');
+            
+            if (landArea && parseFloat(landArea.value) <= 0) {
+                e.preventDefault();
+                alert('Sipërfaqja e tokës duhet të jetë më e madhe se 0!');
+                return;
+            }
+            
+            if (estimatedYield && estimatedYield.value && parseFloat(estimatedYield.value) <= 0) {
+                e.preventDefault();
+                alert('Rendimenti i përllogaritur duhet të jetë më i madh se 0!');
+                return;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ driver.user.get_full_name }}{% endblock %}
+
+{% block content %}
+<h1>{{ driver.user.get_full_name }}</h1>
+<p>Email: {{ driver.user.email }}</p>
+<p>Phone: {{ driver.phone_number }}</p>
+<p>License Number: {{ driver.license_number }}</p>
+<p>Company: {{ driver.company }}</p>
+
+  <a href="{% url 'logistics:driver_update' pk=driver.pk %}">Edit</a>
+  <a href="{% url 'logistics:driver_delete' pk=driver.pk %}">Delete</a>
+{% endblock %}

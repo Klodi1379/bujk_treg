@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Regjistrohu si Fermer - Platforma Bujqësore{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h1 class="text-center mb-4">Regjistrohu si Fermer</h1>
+                    
+                    <form method="post" enctype="multipart/form-data" class="registration-form" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- Informacionet e përdoruesit -->
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="card-title mb-0">
+                                            <i class="fas fa-user me-2"></i>Informacionet e Llogarisë
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        {{ user_form|crispy }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Informacionet e fermës -->
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="card-title mb-0">
+                                            <i class="fas fa-farm me-2"></i>Informacionet e Fermës
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        {{ profile_form|crispy }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Vendndodhja -->
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="card-title mb-0">
+                                            <i class="fas fa-map-marker-alt me-2"></i>Vendndodhja e Fermës
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        {% crispy location_form %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>Regjistrohu
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="mt-4 text-center">
+                        <p>Keni tashmë një llogari? <a href="{% url 'farmer:login' %}" class="text-success">Identifikohuni këtu</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Aktivizo tooltips për fushat e vendndodhjes
+    const latitudeField = document.querySelector('[name="latitude"]');
+    const longitudeField = document.querySelector('[name="longitude"]');
+    
+    if (latitudeField && longitudeField) {
+        // Shto klasat për bootstrap tooltip
+        latitudeField.setAttribute('data-bs-toggle', 'tooltip');
+        latitudeField.setAttribute('data-bs-placement', 'top');
+        latitudeField.setAttribute('title', 'Klikoni për të përdorur vendndodhjen tuaj aktuale');
+        
+        longitudeField.setAttribute('data-bs-toggle', 'tooltip');
+        longitudeField.setAttribute('data-bs-placement', 'top');
+        longitudeField.setAttribute('title', 'Klikoni për të përdorur vendndodhjen tuaj aktuale');
+        
+        // Inicializo tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Funksioni për të marrë vendndodhjen
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    latitudeField.value = position.coords.latitude.toFixed(6);
+                    longitudeField.value = position.coords.longitude.toFixed(6);
+                });
+            }
+        }
+        
+        // Shto event listeners për të kapur klikimet në fushat e vendndodhjes
+        latitudeField.addEventListener('click', getLocation);
+        longitudeField.addEventListener('click', getLocation);
+    }
+});
+</script>
+
+{% endblock %}

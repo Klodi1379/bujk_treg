@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Porosia #{{ order.order_number }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-sm-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-1">
+                <i class="fas fa-shopping-bag text-success me-2"></i>Porosia #{{ order.order_number }}
+            </h1>
+            <p class="text-muted mb-sm-0">
+                Krijuar më {{ order.created_at|date:"d/m/Y H:i" }}
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'marketplace:order_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Kthehu te Lista
+            </a>
+            {% if order.status == 'pending' %}
+                <button class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                    <i class="fas fa-times me-2"></i>Anulo Porosinë
+                </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Statusi i porosisë -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <h5 class="mb-0 me-3">Statusi i Porosisë:</h5>
+                        {% if order.status == 'pending' %}
+                            <span class="badge bg-warning">{{ order.get_status_display }}</span>
+                        {% elif order.status == 'confirmed' %}
+                            <span class="badge bg-info">{{ order.get_status_display }}</span>
+                        {% elif order.status == 'processing' %}
+                            <span class="badge bg-primary">{{ order.get_status_display }}</span>
+                        {% elif order.status == 'shipping' %}
+                            <span class="badge bg-secondary">{{ order.get_status_display }}</span>
+                        {% elif order.status == 'delivered' %}
+                            <span class="badge bg-success">{{ order.get_status_display }}</span>
+                        {% elif order.status == 'cancelled' %}
+                            <span class="badge bg-danger">{{ order.get_status_display }}</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Timeline i statusit -->
+                    <div class="order-timeline">
+                        {% for status in order.status_history.all %}
+                            <div class="timeline-item">
+                                <div class="timeline-date">
+                                    {{ status.created_at|date:"d/m/Y H:i" }}
+                                </div>
+                                <div class="timeline-content">
+                                    <h6>{{ status.get_status_display }}</h6>
+                                    {% if status.notes %}
+                                        <p class="text-muted mb-0">{{ status.notes }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Produktet e porositura -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-box me-2"></i>Produktet e Porositura
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Produkti</th>
+                                    <th>Fermeri</th>
+                                    <th class="text-center">Sasia</th>
+                                    <th class="text-end">Çmimi</th>
+                                    <th class="text-end">Totali</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items.all %}
+                                    <tr>
+                                        <td>
+                                            {% if item.product %}
+                                                <a href="{% url 'product:detail' item.product.slug %}" 
+                                                   class="text-decoration-none">
+                                                    {{ item.product_name }}
+                                                </a>
+                                            {% else %}
+                                                {{ item.product_name }}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if item.farmer %}
+                                                <a href="{% url 'farmer:profile_detail' item.farmer.pk %}"
+                                                   class="text-decoration-none">
+                                                    {{ item.farmer.farm_name }}
+                                                </a>
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {{ item.quantity }} {{ item.unit }}
+                                        </td>
+                                        <td class="text-end">{{ item.unit_price }} ALL</td>
+                                        <td class="text-end">{{ item.subtotal }} ALL</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4" class="text-end">Nëntotali:</td>
+                                    <td class="text-end">{{ order.total_amount }} ALL</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4" class="text-end">Transporti:</td>
+                                    <td class="text-end text-success">Falas</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4" class="text-end"><strong>Totali:</strong></td>
+                                    <td class="text-end">
+                                        <strong class="text-success">{{ order.total_amount }} ALL</strong>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Informacioni i dorëzimit -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-map-marker-alt me-2"></i>Informacioni i Dorëzimit
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <strong>Adresa:</strong><br>
+                        {{ order.shipping_address }}
+                    </p>
+                    <p class="mb-2">
+                        <strong>Qyteti:</strong><br>
+                        {{ order.shipping_city }}
+                    </p>
+                    <p class="mb-0">
+                        <strong>Telefoni:</strong><br>
+                        {{ order.shipping_phone }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Informacioni i pagesës -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-credit-card me-2"></i>Informacioni i Pagesës
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <strong>Metoda e Pagesës:</strong><br>
+                        {{ order.get_payment_method_display }}
+                    </p>
+                    {% if order.transactions.exists %}
+                        <p class="mb-2">
+                            <strong>Statusi i Pagesës:</strong><br>
+                            <span class="badge {% if order.transactions.last.status == 'completed' %}bg-success{% else %}bg-warning{% endif %}">
+                                {{ order.transactions.last.get_status_display }}
+                            </span>
+                        </p>
+                        {% if order.transactions.last.transaction_id %}
+                            <p class="mb-0">
+                                <strong>ID e Transaksionit:</strong><br>
+                                {{ order.transactions.last.transaction_id }}
+                            </p>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Shënime -->
+            {% if order.notes %}
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-sticky-note me-2"></i>Shënime
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {{ order.notes|linebreaks }}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal i anulimit -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Anulo Porosinë</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>A jeni i sigurt që dëshironi të anuloni këtë porosi?</p>
+                <p class="text-danger mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Ky veprim nuk mund të zhbëhet!
+                </p>
+            </div>
+            <div class="modal-footer">
+                <form method="post" action="{% url 'marketplace:cancel_order' order.pk %}">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Mbyll</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-times me-2"></i>Anulo Porosinë
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.order-timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 1.5rem;
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -22px;
+    top: 0;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: #198754;
+}
+
+.timeline-item::after {
+    content: '';
+    position: absolute;
+    left: -16px;
+    top: 14px;
+    width: 2px;
+    height: calc(100% - 14px);
+    background-color: #dee2e6;
+}
+
+.timeline-item:last-child::after {
+    display: none;
+}
+
+.timeline-date {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+
+.timeline-content {
+    padding-left: 1rem;
+}
+</style>
+{% endblock %}

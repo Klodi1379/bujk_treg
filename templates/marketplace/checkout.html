@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Checkout - Finalizimi i Porosisë{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Forma e checkout-it -->
+        <div class="col-lg-8">
+            <!-- Progress steps -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="step active">
+                            <div class="step-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="step-text">Adresa</div>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step">
+                            <div class="step-icon">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <div class="step-text">Pagesa</div>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step">
+                            <div class="step-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="step-text">Konfirmimi</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Forma -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Informacionet e Dorëzimit</h4>
+                    
+                    <form method="post" id="checkoutForm">
+                        {% csrf_token %}
+
+                        <!-- Adresa e dorëzimit -->
+                        <div class="mb-4">
+                            <h5 class="text-success">
+                                <i class="fas fa-user me-2"></i>Informacione Personale
+                            </h5>
+                            {% if not request.user.is_authenticated %}
+                                {{ form.guest_name|as_crispy_field }}
+                                {{ form.guest_email|as_crispy_field }}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h5 class="text-success">
+                                <i class="fas fa-map-marker-alt me-2"></i>Adresa e Dorëzimit
+                            </h5>
+                            {{ form.shipping_address|as_crispy_field }}
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {{ form.shipping_city|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.shipping_phone|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Metoda e pagesës -->
+                        <div class="mb-4">
+                            <h5 class="text-success">
+                                <i class="fas fa-money-bill-wave me-2"></i>Metoda e Pagesës
+                            </h5>
+                            {{ form.payment_method|as_crispy_field }}
+                            
+                            <!-- Informacionet e kartës (shfaqen vetëm kur zgjidhet pagesa me kartë) -->
+                            <div id="cardPaymentDetails" class="d-none">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Të dhënat e kartës do të procesohen në mënyrë të sigurt.
+                                </div>
+                                <div class="row">
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label">Numri i Kartës</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" placeholder="XXXX XXXX XXXX XXXX">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-credit-card"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Data e Skadimit</label>
+                                        <input type="text" class="form-control" placeholder="MM/YY">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">CVV</label>
+                                        <input type="text" class="form-control" placeholder="XXX">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Shënime shtesë -->
+                        <div class="mb-4">
+                            <h5 class="text-success">
+                                <i class="fas fa-sticky-note me-2"></i>Shënime Shtesë
+                            </h5>
+                            {{ form.notes|as_crispy_field }}
+                        </div>
+
+                        <!-- Butonat e veprimit -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'marketplace:cart' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Kthehu te Shporta
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-check me-2"></i>Konfirmo Porosinë
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Përmbledhja e porosisë -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shopping-basket me-2"></i>Përmbledhje e Porosisë
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Lista e produkteve -->
+                    {% for item in cart.items.all %}
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h6 class="mb-1">{{ item.product.name }}</h6>
+                                <small class="text-muted">
+                                    {{ item.quantity }} {{ item.product.get_unit_display }} x 
+                                    {{ item.unit_price }} ALL
+                                </small>
+                            </div>
+                            <span>{{ item.subtotal }} ALL</span>
+                        </div>
+                        {% if not forloop.last %}<hr class="my-2">{% endif %}
+                    {% endfor %}
+
+                    <!-- Totalet -->
+                    <div class="border-top pt-3 mt-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Nëntotali:</span>
+                            <strong>{{ cart.total }} ALL</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Transporti:</span>
+                            <strong class="text-success">Falas</strong>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <h5>Totali:</h5>
+                            <h5 class="text-success">{{ cart.total }} ALL</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informacione shtesë -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6 class="mb-3">
+                        <i class="fas fa-info-circle text-info me-2"></i>Informacion i Rëndësishëm
+                    </h6>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>Dorëzimi brenda 24-48 orëve
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>Pagesë e sigurt
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle text-success me-2"></i>Garanci kthimi deri në 14 ditë
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentMethodSelect = document.querySelector('[name="payment_method"]');
+    const cardPaymentDetails = document.getElementById('cardPaymentDetails');
+
+    if (paymentMethodSelect && cardPaymentDetails) {
+        paymentMethodSelect.addEventListener('change', function() {
+            if (this.value === 'card') {
+                cardPaymentDetails.classList.remove('d-none');
+            } else {
+                cardPaymentDetails.classList.add('d-none');
+            }
+        });
+    }
+
+    // Form validation
+    const form = document.getElementById('checkoutForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const paymentMethod = paymentMethodSelect.value;
+            
+            if (paymentMethod === 'card') {
+                // Validate card details here if needed
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.step {
+    text-align: center;
+    flex: 1;
+    position: relative;
+}
+
+.step-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+    border: 2px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px;
+}
+
+.step.active .step-icon {
+    background-color: #198754;
+    border-color: #198754;
+    color: white;
+}
+
+.step-text {
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.step.active .step-text {
+    color: #198754;
+    font-weight: bold;
+}
+
+.step-line {
+    flex: 1;
+    height: 2px;
+    background-color: #dee2e6;
+    margin: 20px 10px;
+}
+
+.step.active + .step-line {
+    background-color: #198754;
+}
+</style>
+{% endblock %}

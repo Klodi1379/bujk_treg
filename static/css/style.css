@@ -1,0 +1,163 @@
+/* Global Styles */
+:root {
+    --primary-color: #198754;  /* Bootstrap success color */
+    --secondary-color: #6c757d;
+    --light-bg: #f8f9fa;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Navigation */
+.navbar-brand i {
+    color: #a3e635;
+}
+
+/* Cards */
+.product-card {
+    transition: transform 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Dashboard */
+.dashboard-card {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.dashboard-card .card-header {
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 10px 10px 0 0;
+}
+
+/* Forms */
+.form-container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    background-color: var(--light-bg);
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Product Details */
+.product-image-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.product-image-container img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+.thumbnail-image {
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.thumbnail-image:hover {
+    opacity: 0.8;
+}
+
+/* Footer */
+footer {
+    background-color: #343a40;
+}
+
+.social-links a {
+    transition: color 0.2s;
+}
+
+.social-links a:hover {
+    color: var(--primary-color) !important;
+}
+
+/* Timeline for production logs */
+.timeline {
+    position: relative;
+    padding: 20px 0;
+}
+
+.timeline-item {
+    position: relative;
+    padding: 20px 0;
+    padding-left: 60px;
+}
+
+.timeline-item:before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background-color: var(--primary-color);
+}
+
+.timeline-date {
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.timeline-image {
+    max-width: 200px;
+    margin-top: 10px;
+}
+
+/* Badges and Labels */
+.badge-organic {
+    background-color: #198754;
+    color: white;
+}
+
+.badge-pesticide-free {
+    background-color: #0dcaf0;
+    color: white;
+}
+
+/* Cart and Orders */
+.cart-item {
+    background-color: var(--light-bg);
+    border-radius: 10px;
+    margin-bottom: 15px;
+    padding: 15px;
+}
+
+.order-status {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.9em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .form-container {
+        padding: 15px;
+    }
+    
+    .timeline-item {
+        padding-left: 40px;
+    }
+    
+    .timeline-item:before {
+        left: 10px;
+    }
+}

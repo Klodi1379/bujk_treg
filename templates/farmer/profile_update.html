@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Përditëso Profilin - {{ farmer.farm_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h1 class="card-title text-center mb-4">
+                        <i class="fas fa-user-edit text-success me-2"></i>Përditëso Profilin
+                    </h1>
+
+                    <form method="post" enctype="multipart/form-data" class="profile-update-form">
+                        {% csrf_token %}
+                        
+                        <!-- Informacionet bazë -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>Informacionet Bazë
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ form.farm_name|as_crispy_field }}
+                                        {{ form.phone_number|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.website|as_crispy_field }}
+                                        {{ form.total_land_area|as_crispy_field }}
+                                    </div>
+                                </div>
+                                
+                                <!-- Përshkrimi i fermës -->
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        {{ form.farm_description|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Imazhi dhe mediat -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-image me-2"></i>Imazhi i Profilit
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-4">
+                                        {% if form.instance.profile_image %}
+                                            <img src="{{ form.instance.profile_image.url }}" 
+                                                 alt="Imazhi aktual i profilit"
+                                                 class="img-fluid rounded mb-3">
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-8">
+                                        {{ form.profile_image|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Butonat e veprimit -->
+                        <div class="row">
+                            <div class="col-md-6 offset-md-3">
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="fas fa-save me-2"></i>Ruaj Ndryshimet
+                                    </button>
+                                    <a href="{% url 'farmer:profile_detail' farmer.pk %}" 
+                                       class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-2"></i>Anullo
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Lidhjet e tjera -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-center gap-3">
+                                <a href="{% url 'farmer:update_location' %}" class="btn btn-outline-success">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Përditëso Vendndodhjen
+                                </a>
+                                <a href="{% url 'farmer:manage_crops' %}" class="btn btn-outline-success">
+                                    <i class="fas fa-seedling me-2"></i>Menaxho Kulturat
+                                </a>
+                                <a href="{% url 'farmer:add_certification' %}" class="btn btn-outline-success">
+                                    <i class="fas fa-certificate me-2"></i>Shto Certifikim
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Preview imazhit të zgjedhur
+    const imageInput = document.querySelector('input[type="file"]');
+    const previewContainer = document.querySelector('.col-md-4');
+    
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    let preview = previewContainer.querySelector('img');
+                    if (!preview) {
+                        preview = document.createElement('img');
+                        preview.classList.add('img-fluid', 'rounded', 'mb-3');
+                        previewContainer.appendChild(preview);
+                    }
+                    preview.src = e.target.result;
+                }
+                
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+    }
+    
+    // Validimi i formës
+    const form = document.querySelector('.profile-update-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const landArea = document.querySelector('[name="total_land_area"]');
+            if (landArea && parseFloat(landArea.value) < 0) {
+                e.preventDefault();
+                alert('Sipërfaqja e tokës nuk mund të jetë negative!');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

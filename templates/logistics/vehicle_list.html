@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% trans "Vehicles" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">{% trans "Vehicles" %}</h2>
+                {% if perms.logistics.add_vehicle %}
+                    <a href="{% url 'logistics:vehicle_create' %}" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>{% trans "Add Vehicle" %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Form -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label for="search">{% trans "Search" %}</label>
+                            <input type="text" id="search" name="search" class="form-control"
+                                   placeholder="{% trans 'Plate number or model...' %}"
+                                   value="{{ request.GET.search }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="type">{% trans "Vehicle Type" %}</label>
+                            <select id="type" name="type" class="form-select">
+                                <option value="">{% trans "All Types" %}</option>
+                                {% for value, label in vehicle_types %}
+                                    <option value="{{ value }}" {% if request.GET.type == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="availability">{% trans "Availability" %}</label>
+                            <select id="availability" name="availability" class="form-select">
+                                <option value="">{% trans "All" %}</option>
+                                <option value="true" {% if request.GET.availability == 'true' %}selected{% endif %}>
+                                    {% trans "Available" %}
+                                </option>
+                                <option value="false" {% if request.GET.availability == 'false' %}selected{% endif %}>
+                                    {% trans "Not Available" %}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-auto">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>{% trans "Search" %}
+                            </button>
+                            {% if request.GET %}
+                                <a href="{% url 'logistics:vehicle_list' %}" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>{% trans "Clear" %}
+                                </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if vehicles %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+            {% for vehicle in vehicles %}
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-header {% if vehicle.availability %}bg-success{% else %}bg-secondary{% endif %} text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">{{ vehicle.plate_number }}</h5>
+                                {% if vehicle.availability %}
+                                    <span class="badge bg-light text-success">
+                                        <i class="fas fa-check me-1"></i>{% trans "Available" %}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-light text-secondary">
+                                        <i class="fas fa-ban me-1"></i>{% trans "Not Available" %}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <small class="text-muted">{% trans "Type" %}:</small>
+                                <p class="mb-0">
+                                    <i class="fas fa-truck me-2"></i>{{ vehicle.get_vehicle_type_display }}
+                                </p>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted">{% trans "Details" %}:</small>
+                                <p class="mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>{{ vehicle.model }} ({{ vehicle.year }})
+                                </p>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted">{% trans "Capacity" %}:</small>
+                                <p class="mb-0">
+                                    <i class="fas fa-weight-hanging me-2"></i>{{ vehicle.capacity }} kg
+                                </p>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted">{% trans "Company" %}:</small>
+                                <p class="mb-0">
+                                    <i class="fas fa-building me-2"></i>{{ vehicle.company.name }}
+                                </p>
+                            </div>
+
+                            {% if vehicle.current_location %}
+                                <div class="mb-3">
+                                    <small class="text-muted">{% trans "Current Location" %}:</small>
+                                    <p class="mb-0">
+                                        <i class="fas fa-location-dot me-2"></i>{{ vehicle.current_location }}
+                                    </p>
+                                </div>
+                            {% endif %}
+
+                            <!-- Maintenance Status -->
+                            <div class="mb-3">
+                                <small class="text-muted">{% trans "Maintenance Status" %}:</small>
+                                {% with days_to_maintenance=vehicle.next_maintenance|timeuntil %}
+                                    {% if vehicle.next_maintenance|date:"Y-m-d" < now|date:"Y-m-d" %}
+                                        <div class="alert alert-danger mb-0 py-1">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            {% trans "Maintenance Overdue" %}
+                                        </div>
+                                    {% elif "days" in days_to_maintenance and days_to_maintenance|cut:" days"|add:0 <= 7 %}
+                                        <div class="alert alert-warning mb-0 py-1">
+                                            <i class="fas fa-clock me-2"></i>
+                                            {% trans "Maintenance Due in" %} {{ days_to_maintenance }}
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-success mb-0 py-1">
+                                            <i class="fas fa-check me-2"></i>
+                                            {% trans "Next Maintenance in" %} {{ days_to_maintenance }}
+                                        </div>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+
+                            <!-- Insurance Status -->
+                            <div class="mb-3">
+                                <small class="text-muted">{% trans "Insurance Status" %}:</small>
+                                {% with days_to_expiry=vehicle.insurance_expiry|timeuntil %}
+                                    {% if vehicle.insurance_expiry|date:"Y-m-d" < now|date:"Y-m-d" %}
+                                        <div class="alert alert-danger mb-0 py-1">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            {% trans "Insurance Expired" %}
+                                        </div>
+                                    {% elif "days" in days_to_expiry and days_to_expiry|cut:" days"|add:0 <= 30 %}
+                                        <div class="alert alert-warning mb-0 py-1">
+                                            <i class="fas fa-clock me-2"></i>
+                                            {% trans "Insurance Expires in" %} {{ days_to_expiry }}
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-success mb-0 py-1">
+                                            <i class="fas fa-check me-2"></i>
+                                            {% trans "Insurance Valid" %}
+                                        </div>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="btn-group w-100">
+                                <a href="{% url 'logistics:vehicle_detail' pk=vehicle.pk %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-eye me-1"></i>{% trans "View" %}
+                                </a>
+                                {% if perms.logistics.change_vehicle %}
+                                    <a href="{% url 'logistics:vehicle_update' pk=vehicle.pk %}" class="btn btn-outline-success">
+                                        <i class="fas fa-edit me-1"></i>{% trans "Edit" %}
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+            <nav aria-label="{% trans 'Pagination' %}" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.availability %}&availability={{ request.GET.availability }}{% endif %}">&laquo;</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.availability %}&availability={{ request.GET.availability }}{% endif %}">
+                                {% trans "Previous" %}
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">
+                            {% blocktrans with number=page_obj.number total=page_obj.paginator.num_pages %}
+                                Page {{ number }} of {{ total }}
+                            {% endblocktrans %}
+                        </span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.availability %}&availability={{ request.GET.availability }}{% endif %}">
+                                {% trans "Next" %}
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.availability %}&availability={{ request.GET.availability }}{% endif %}">&raquo;</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            <i class="fas fa-info-circle me-2"></i>{% trans "No vehicles found." %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

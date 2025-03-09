@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ warehouse }}{% endblock %}
+
+{% block content %}
+<h1>{{ warehouse }}</h1>
+  <p>Location: {{ warehouse.location }}</p>
+  <p>Capacity: {{ warehouse.capacity }}</p>
+
+  <a href="{% url 'logistics:warehouse_update' pk=warehouse.pk %}">Edit</a>
+  <a href="{% url 'logistics:warehouse_delete' pk=warehouse.pk %}">Delete</a>
+{% endblock %}

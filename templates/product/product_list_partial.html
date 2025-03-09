@@ -1,0 +1,168 @@
+{% for product in products %}
+    <div class="col-sm-6 col-md-4 col-lg-3">
+        <div class="card h-100 product-card" data-product-id="{{ product.id }}">
+            <!-- Imazhi i produktit -->
+            <div class="position-relative">
+                {% if product.images.exists %}
+                    <img src="{{ product.images.first.image.url }}" 
+                         class="card-img-top"
+                         alt="{{ product.name }}"
+                         style="height: 200px; object-fit: cover;">
+                {% else %}
+                    <img src="{% static 'images/product-placeholder.jpg' %}" 
+                         class="card-img-top"
+                         alt="{{ product.name }}"
+                         style="height: 200px; object-fit: cover;">
+                {% endif %}
+
+                <!-- Etiketat -->
+                {% if product.discount_price %}
+                    <div class="position-absolute top-0 start-0 m-2">
+                        <span class="badge bg-danger">
+                            -{{ product.discount_percentage }}%
+                        </span>
+                    </div>
+                {% endif %}
+                {% if not product.is_in_stock %}
+                    <div class="position-absolute top-0 end-0 m-2">
+                        <span class="badge bg-secondary">
+                            <i class="fas fa-times-circle me-1"></i>Nuk ka në gjendje
+                        </span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="card-body">
+                <!-- Emri dhe fermeri -->
+                <h5 class="card-title mb-1">{{ product.name }}</h5>
+                <p class="text-muted small mb-2">
+                    <i class="fas fa-user me-1"></i>{{ product.farmer.farm_name }}
+                </p>
+
+                <!-- Etiketat shtesë -->
+                <div class="mb-2">
+                    {% if product.is_organic %}
+                        <span class="badge bg-success">
+                            <i class="fas fa-leaf me-1"></i>Organik
+                        </span>
+                    {% endif %}
+                    {% if product.is_featured %}
+                        <span class="badge bg-warning">
+                            <i class="fas fa-star me-1"></i>I Veçantë
+                        </span>
+                    {% endif %}
+                </div>
+
+                <!-- Çmimi dhe detajet -->
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        {% if product.discount_price %}
+                            <span class="h5 text-success mb-0">
+                                {{ product.discount_price }} ALL
+                            </span>
+                            <small class="text-muted text-decoration-line-through">
+                                {{ product.price }} ALL
+                            </small>
+                        {% else %}
+                            <span class="h5 text-success mb-0">
+                                {{ product.price }} ALL
+                            </span>
+                        {% endif %}
+                        <small class="text-muted">/ {{ product.get_unit_display }}</small>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-muted d-block">Min. porosi:</small>
+                        <small>{{ product.minimum_order }} {{ product.get_unit_display }}</small>
+                    </div>
+                </div>
+
+                <!-- Vlerësimi -->
+                {% if product.reviews.exists %}
+                    <div class="mt-2">
+                        <div class="d-flex align-items-center">
+                            <div class="me-2">
+                                {% with ''|center:5 as range %}
+                                    {% for _ in range %}
+                                        <i class="fas fa-star {% if forloop.counter <= product.average_rating %}text-warning{% else %}text-muted{% endif %}"></i>
+                                    {% endfor %}
+                                {% endwith %}
+                            </div>
+                            <small class="text-muted">({{ product.reviews.count }})</small>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="card-footer bg-transparent">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'product:detail' product.slug %}" 
+                       class="btn btn-outline-success">
+                        <i class="fas fa-info-circle me-2"></i>Detaje
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% empty %}
+    <div class="col-12">
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-box-open fa-4x text-muted"></i>
+            </div>
+            <h4>Nuk u gjetën produkte</h4>
+            <p class="text-muted mb-4">
+                Nuk ka produkte që përputhen me kriteret e kërkimit.
+                Provoni të ndryshoni filtrat ose të pastroni kërkimin.
+            </p>
+            <a href="{% url 'product:list' %}" class="btn btn-success">
+                <i class="fas fa-undo me-2"></i>Rivendos Filtrat
+            </a>
+        </div>
+    </div>
+{% endfor %}
+
+{% if is_paginated %}
+    <div class="col-12">
+        <nav class="mt-4" aria-label="Navigimi i faqeve">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{{ request.GET.urlencode }}" data-page="1">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="?page={{ page_obj.previous_page_number }}{{ request.GET.urlencode }}"
+                           data-page="{{ page_obj.previous_page_number }}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        Faqja {{ page_obj.number }} nga {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="?page={{ page_obj.next_page_number }}{{ request.GET.urlencode }}"
+                           data-page="{{ page_obj.next_page_number }}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="?page={{ page_obj.paginator.num_pages }}{{ request.GET.urlencode }}"
+                           data-page="{{ page_obj.paginator.num_pages }}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+{% endif %}

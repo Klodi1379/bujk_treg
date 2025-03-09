@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Fshi Produktin - {{ object.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-danger">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-exclamation-triangle text-danger fa-4x"></i>
+                    </div>
+                    
+                    <h2 class="card-title mb-4">Fshi Produktin</h2>
+                    
+                    <p class="lead mb-4">
+                        A jeni i sigurt që dëshironi të fshini produktin <strong>{{ object.name }}</strong>?
+                    </p>
+
+                    <!-- Detajet e produktit -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-4">
+                                    {% if object.images.exists %}
+                                        <img src="{{ object.images.first.image.url }}" 
+                                             alt="{{ object.name }}"
+                                             class="img-fluid rounded"
+                                             style="max-height: 200px; object-fit: cover;">
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-8 text-start">
+                                    <h5 class="text-danger mb-3">Detajet e Produktit:</h5>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p class="mb-2">
+                                                <strong>Kategoria:</strong><br>
+                                                {{ object.category.name }}
+                                            </p>
+                                            <p class="mb-2">
+                                                <strong>Çmimi:</strong><br>
+                                                {% if object.discount_price %}
+                                                    <span class="text-decoration-line-through">{{ object.price }}</span>
+                                                    <span class="text-danger">{{ object.discount_price }}</span> ALL
+                                                {% else %}
+                                                    {{ object.price }} ALL
+                                                {% endif %}
+                                            </p>
+                                            <p class="mb-2">
+                                                <strong>Sasia në gjendje:</strong><br>
+                                                {{ object.stock }} {{ object.get_unit_display }}
+                                            </p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="mb-2">
+                                                <strong>Krijuar më:</strong><br>
+                                                {{ object.created_at|date:"d/m/Y" }}
+                                            </p>
+                                            <p class="mb-2">
+                                                <strong>Përditësuar më:</strong><br>
+                                                {{ object.updated_at|date:"d/m/Y" }}
+                                            </p>
+                                            {% if object.is_organic %}
+                                                <p class="mb-2">
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-leaf me-1"></i>Produkt Organik
+                                                    </span>
+                                                </p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Ky veprim nuk mund të zhbëhet! Do të fshihen:
+                        <ul class="text-start mb-0 mt-2">
+                            <li>Të gjitha imazhet e produktit</li>
+                            <li>Të gjitha vlerësimet dhe komentet</li>
+                            <li>Të gjitha pyetjet dhe përgjigjet</li>
+                            <li>Statistikat e shitjeve dhe historinë e porosive</li>
+                        </ul>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2 d-md-flex justify-content-center">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="fas fa-trash me-2"></i>Po, Fshi Produktin
+                            </button>
+                            <a href="{% url 'product:detail' object.slug %}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-times me-2"></i>Anullo
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Sugjerime -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="mb-3">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>Sugjerime
+                    </h5>
+                    <p class="mb-0">
+                        <strong>Para se të fshini produktin, merrni parasysh:</strong>
+                    </p>
+                    <ul class="mb-0">
+                        <li>Të përditësoni çmimin ose disponueshmërinë në vend që ta fshini</li>
+                        <li>Të shtoni foto të reja ose të përmirësoni përshkrimin</li>
+                        <li>Të aplikoni ulje çmimi për të rritur shitjet</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

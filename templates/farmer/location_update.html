@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Përditëso Vendndodhjen - {{ farmer.farm_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h1 class="card-title text-center mb-4">
+                        <i class="fas fa-map-marker-alt text-success me-2"></i>Përditëso Vendndodhjen
+                    </h1>
+
+                    <form method="post" class="location-form">
+                        {% csrf_token %}
+                        
+                        <!-- Informacionet e adresës -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-home me-2"></i>Adresa e Fermës
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-12">
+                                        {{ form.address|as_crispy_field }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ form.city|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.region|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Koordinatat -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-map me-2"></i>Koordinatat Gjeografike
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        {{ form.latitude|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.longitude|as_crispy_field }}
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="button" id="getCurrentLocation" class="btn btn-outline-success">
+                                        <i class="fas fa-crosshairs me-2"></i>Përdor Vendndodhjen Aktuale
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Harta -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-map-marked-alt me-2"></i>Zgjidh në Hartë
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="map" style="height: 400px;" class="rounded"></div>
+                                <small class="text-muted d-block mt-2">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Klikoni në hartë për të përditësuar koordinatat ose përdorni vendndodhjen aktuale.
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Butonat e veprimit -->
+                        <div class="row">
+                            <div class="col-md-6 offset-md-3">
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="fas fa-save me-2"></i>Ruaj Vendndodhjen
+                                    </button>
+                                    <a href="{% url 'farmer:dashboard' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-2"></i>Anullo
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const latitudeInput = document.querySelector('[name="latitude"]');
+    const longitudeInput = document.querySelector('[name="longitude"]');
+    const getCurrentLocationBtn = document.getElementById('getCurrentLocation');
+    
+    // Inicializimi i hartës
+    const initialLat = parseFloat(latitudeInput.value) || 41.3275;  // Default: Qendër e Shqipërisë
+    const initialLng = parseFloat(longitudeInput.value) || 19.8187;
+    
+    const map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: initialLat, lng: initialLng },
+        zoom: 13
+    });
+    
+    // Shto markerin
+    let marker = new google.maps.Marker({
+        position: { lat: initialLat, lng: initialLng },
+        map: map,
+        draggable: true,
+        title: 'Vendndodhja e fermës'
+    });
+    
+    // Event handlers për markerin
+    google.maps.event.addListener(marker, 'dragend', function(event) {
+        updateCoordinates(event.latLng.lat(), event.latLng.lng());
+    });
+    
+    // Event handler për klikimin në hartë
+    google.maps.event.addListener(map, 'click', function(event) {
+        marker.setPosition(event.latLng);
+        updateCoordinates(event.latLng.lat(), event.latLng.lng());
+    });
+    
+    // Event handler për butonin e vendndodhjes aktuale
+    if (getCurrentLocationBtn) {
+        getCurrentLocationBtn.addEventListener('click', function() {
+            if (navigator.geolocation) {
+                getCurrentLocationBtn.disabled = true;
+                getCurrentLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Duke marrë vendndodhjen...';
+                
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        
+                        const newLatLng = new google.maps.LatLng(lat, lng);
+                        marker.setPosition(newLatLng);
+                        map.setCenter(newLatLng);
+                        updateCoordinates(lat, lng);
+                        
+                        getCurrentLocationBtn.disabled = false;
+                        getCurrentLocationBtn.innerHTML = '<i class="fas fa-crosshairs me-2"></i>Përdor Vendndodhjen Aktuale';
+                    },
+                    function(error) {
+                        alert('Gabim në marrjen e vendndodhjes: ' + error.message);
+                        getCurrentLocationBtn.disabled = false;
+                        getCurrentLocationBtn.innerHTML = '<i class="fas fa-crosshairs me-2"></i>Përdor Vendndodhjen Aktuale';
+                    }
+                );
+            } else {
+                alert('Shfletuesi juaj nuk mbështet gjeolokacionin.');
+            }
+        });
+    }
+    
+    // Funksion për përditësimin e koordinatave në formë
+    function updateCoordinates(lat, lng) {
+        latitudeInput.value = lat.toFixed(6);
+        longitudeInput.value = lng.toFixed(6);
+    }
+    
+    // Validimi i formës
+    const form = document.querySelector('.location-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const address = form.querySelector('[name="address"]');
+            const city = form.querySelector('[name="city"]');
+            const region = form.querySelector('[name="region"]');
+            
+            if (!address.value.trim() || !city.value.trim() || !region.value.trim()) {
+                e.preventDefault();
+                alert('Ju lutem plotësoni të gjitha fushat e adresës!');
+                return;
+            }
+            
+            if (!latitudeInput.value || !longitudeInput.value) {
+                e.preventDefault();
+                alert('Ju lutem zgjidhni vendndodhjen në hartë ose përdorni vendndodhjen aktuale!');
+                return;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

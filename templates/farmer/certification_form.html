@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Shto Certifikim të Ri{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h1 class="card-title text-center mb-4">
+                        <i class="fas fa-certificate text-success me-2"></i>Shto Certifikim të Ri
+                    </h1>
+
+                    <form method="post" enctype="multipart/form-data" class="certification-form">
+                        {% csrf_token %}
+                        
+                        <!-- Informacionet bazë -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>Detajet e Certifikimit
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ form.name|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.issuing_organization|as_crispy_field }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ form.issue_date|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.expiry_date|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dokumenti -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-file-upload me-2"></i>Dokumenti i Certifikimit
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        {{ form.document|as_crispy_field }}
+                                        <small class="text-muted">
+                                            Ngarko një kopje të certifikimit në format PDF ose imazh.
+                                            Madhësia maksimale: 10MB.
+                                        </small>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div id="preview" class="text-center">
+                                            {% if form.instance.document %}
+                                                <a href="{{ form.instance.document.url }}" 
+                                                   target="_blank"
+                                                   class="btn btn-outline-success mb-2">
+                                                    <i class="fas fa-eye me-2"></i>Shiko dokumentin
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Këshilla -->
+                        <div class="alert alert-info mb-4">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-lightbulb fa-2x text-info"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h5 class="alert-heading">Këshilla për Certifikimet</h5>
+                                    <p class="mb-0">
+                                        Certifikimet e vlefshme rrisin besueshmërinë e prodhimeve tuaja dhe mund të 
+                                        rezultojnë në çmime më të larta në treg. Sigurohuni që:
+                                    </p>
+                                    <ul class="mb-0">
+                                        <li>Dokumenti të jetë qartësisht i lexueshëm</li>
+                                        <li>Data e skadimit të jetë e saktë</li>
+                                        <li>Të përfshini çdo informacion shtesë të rëndësishëm</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Butonat e veprimit -->
+                        <div class="row">
+                            <div class="col-md-6 offset-md-3">
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="fas fa-save me-2"></i>Ruaj Certifikimin
+                                    </button>
+                                    <a href="{% url 'farmer:dashboard' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-2"></i>Anullo
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validimi i datave
+    const form = document.querySelector('.certification-form');
+    const issueDate = document.querySelector('[name="issue_date"]');
+    const expiryDate = document.querySelector('[name="expiry_date"]');
+    
+    if (form && issueDate && expiryDate) {
+        form.addEventListener('submit', function(e) {
+            const issue = new Date(issueDate.value);
+            const expiry = new Date(expiryDate.value);
+            const today = new Date();
+            
+            if (issue > expiry) {
+                e.preventDefault();
+                alert('Data e skadimit duhet të jetë pas datës së lëshimit!');
+                return;
+            }
+            
+            if (expiry < today) {
+                if (!confirm('Kjo certifikatë duket se ka skaduar. Dëshironi të vazhdoni?')) {
+                    e.preventDefault();
+                    return;
+                }
+            }
+        });
+    }
+    
+    // Preview i dokumentit
+    const documentInput = document.querySelector('[name="document"]');
+    const previewContainer = document.getElementById('preview');
+    
+    if (documentInput && previewContainer) {
+        documentInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const fileName = e.target.files[0].name;
+                const fileExtension = fileName.split('.').pop().toLowerCase();
+                
+                let icon = 'fa-file';
+                if (['pdf'].includes(fileExtension)) {
+                    icon = 'fa-file-pdf';
+                } else if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+                    icon = 'fa-file-image';
+                }
+                
+                previewContainer.innerHTML = `
+                    <div class="text-center mb-2">
+                        <i class="fas ${icon} fa-3x text-success"></i>
+                    </div>
+                    <small class="d-block text-muted">${fileName}</small>
+                `;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

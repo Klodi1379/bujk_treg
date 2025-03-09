@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% trans "Shipments" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Filter Sidebar -->
+        <div class="col-md-3">
+            <div class="card sticky-top" style="top: 1rem;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-filter me-2"></i>{% trans "Filter Shipments" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="filterForm">
+                        {{ filter_form|crispy }}
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-search me-2"></i>{% trans "Filter" %}
+                        </button>
+                        {% if request.GET %}
+                            <a href="{% url 'logistics:shipment_list' %}" class="btn btn-secondary w-100 mt-2">
+                                <i class="fas fa-times me-2"></i>{% trans "Clear Filters" %}
+                            </a>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shipments List -->
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">{% trans "Shipments" %}</h2>
+                {% if perms.logistics.add_shipment %}
+                    <a href="{% url 'logistics:shipment_create' %}" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>{% trans "New Shipment" %}
+                    </a>
+                {% endif %}
+            </div>
+
+            {% if shipments %}
+                <div class="row row-cols-1 row-cols-md-2 g-4">
+                    {% for shipment in shipments %}
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-header d-flex justify-content-between align-items-center
+                                            {% if shipment.status == 'delivered' %}bg-success text-white
+                                            {% elif shipment.status == 'delayed' %}bg-warning
+                                            {% elif shipment.status == 'cancelled' %}bg-danger text-white
+                                            {% endif %}">
+                                    <h5 class="mb-0">{{ shipment.tracking_number }}</h5>
+                                    <span class="badge {% if shipment.priority == 'urgent' %}bg-danger
+                                                      {% elif shipment.priority == 'high' %}bg-warning
+                                                      {% elif shipment.priority == 'medium' %}bg-info
+                                                      {% else %}bg-secondary{% endif %}">
+                                        {{ shipment.get_priority_display }}
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <small class="text-muted">{% trans "Route" %}:</small>
+                                        <p class="mb-0">
+                                            <i class="fas fa-map-marker-alt text-danger me-1"></i>{{ shipment.origin }}
+                                            <i class="fas fa-arrow-right mx-2"></i>
+                                            <i class="fas fa-map-marker-alt text-success me-1"></i>{{ shipment.destination }}
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <small class="text-muted">{% trans "Status" %}:</small>
+                                        <p class="mb-0">
+                                            <span class="badge {% if shipment.status == 'delivered' %}bg-success
+                                                              {% elif shipment.status == 'delayed' %}bg-warning
+                                                              {% elif shipment.status == 'cancelled' %}bg-danger
+                                                              {% else %}bg-info{% endif %}">
+                                                {{ shipment.get_status_display }}
+                                            </span>
+                                        </p>
+                                    </div>
+
+                                    {% if shipment.current_location %}
+                                        <div class="mb-3">
+                                            <small class="text-muted">{% trans "Current Location" %}:</small>
+                                            <p class="mb-0">
+                                                <i class="fas fa-location-dot me-1"></i>{{ shipment.current_location }}
+                                            </p>
+                                        </div>
+                                    {% endif %}
+
+                                    <div class="mb-3">
+                                        <small class="text-muted">{% trans "Schedule" %}:</small>
+                                        <p class="mb-0">
+                                            <i class="fas fa-calendar me-1"></i>{{ shipment.departure_date|date:"d M Y" }}
+                                            <i class="fas fa-arrow-right mx-2"></i>
+                                            <i class="fas fa-calendar-check me-1"></i>{{ shipment.estimated_arrival|date:"d M Y" }}
+                                        </p>
+                                    </div>
+
+                                    {% if shipment.driver %}
+                                        <div class="mb-3">
+                                            <small class="text-muted">{% trans "Driver" %}:</small>
+                                            <p class="mb-0">
+                                                <i class="fas fa-user me-1"></i>{{ shipment.driver }}
+                                            </p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <div class="btn-group w-100">
+                                        <a href="{% url 'logistics:shipment_detail' pk=shipment.pk %}" class="btn btn-outline-primary">
+                                            <i class="fas fa-eye me-1"></i>{% trans "View" %}
+                                        </a>
+                                        {% if perms.logistics.change_shipment %}
+                                            <a href="{% url 'logistics:shipment_update' pk=shipment.pk %}" class="btn btn-outline-success">
+                                                <i class="fas fa-edit me-1"></i>{% trans "Edit" %}
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {% if is_paginated %}
+                    <nav aria-label="{% trans 'Pagination' %}" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1">&laquo;</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">{% trans "Previous" %}</a>
+                                </li>
+                            {% endif %}
+
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    {% blocktrans with number=page_obj.number total=page_obj.paginator.num_pages %}
+                                        Page {{ number }} of {{ total }}
+                                    {% endblocktrans %}
+                                </span>
+                            </li>
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">{% trans "Next" %}</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">&raquo;</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>{% trans "No shipments found." %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

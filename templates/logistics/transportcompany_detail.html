@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ transport_company }}{% endblock %}
+
+{% block content %}
+<h1>{{ transport_company }}</h1>
+    <p>Contact Person: {{ transport_company.contact_person }}</p>
+    <p>Contact Email: {{ transport_company.contact_email }}</p>
+    <p>Contact Phone: {{ transport_company.contact_phone }}</p>
+
+  <a href="{% url 'logistics:transport_company_update' pk=transport_company.pk %}">Edit</a>
+  <a href="{% url 'logistics:transport_company_delete' pk=transport_company.pk %}">Delete</a>
+{% endblock %}

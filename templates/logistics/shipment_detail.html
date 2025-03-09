@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% trans "Shipment" %} {{ shipment.tracking_number }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Main Shipment Information -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center 
+                            {% if shipment.status == 'delivered' %}bg-success text-white
+                            {% elif shipment.status == 'delayed' %}bg-warning
+                            {% elif shipment.status == 'cancelled' %}bg-danger text-white
+                            {% endif %}">
+                    <h4 class="mb-0">
+                        <i class="fas fa-truck me-2"></i>{{ shipment.tracking_number }}
+                    </h4>
+                    <span class="badge {% if shipment.priority == 'urgent' %}bg-danger
+                                      {% elif shipment.priority == 'high' %}bg-warning
+                                      {% elif shipment.priority == 'medium' %}bg-info
+                                      {% else %}bg-secondary{% endif %}">
+                        {{ shipment.get_priority_display }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Route Information -->
+                        <div class="col-md-6 mb-4">
+                            <h5 class="border-bottom pb-2">{% trans "Route Information" %}</h5>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">{% trans "Origin" %}:</small>
+                                <p class="mb-1"><i class="fas fa-map-marker-alt text-danger me-2"></i>{{ shipment.origin }}</p>
+                                {% if shipment.origin_warehouse %}
+                                    <small class="text-muted">{% trans "Warehouse" %}: {{ shipment.origin_warehouse.name }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">{% trans "Destination" %}:</small>
+                                <p class="mb-1"><i class="fas fa-map-marker-alt text-success me-2"></i>{{ shipment.destination }}</p>
+                                {% if shipment.destination_warehouse %}
+                                    <small class="text-muted">{% trans "Warehouse" %}: {{ shipment.destination_warehouse.name }}</small>
+                                {% endif %}
+                            </div>
+                            {% if shipment.current_location %}
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">{% trans "Current Location" %}:</small>
+                                    <p class="mb-0"><i class="fas fa-location-dot me-2"></i>{{ shipment.current_location }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Schedule Information -->
+                        <div class="col-md-6 mb-4">
+                            <h5 class="border-bottom pb-2">{% trans "Schedule" %}</h5>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">{% trans "Departure Date" %}:</small>
+                                <p class="mb-0"><i class="fas fa-calendar me-2"></i>{{ shipment.departure_date }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">{% trans "Estimated Arrival" %}:</small>
+                                <p class="mb-0"><i class="fas fa-calendar-check me-2"></i>{{ shipment.estimated_arrival }}</p>
+                            </div>
+                            {% if shipment.actual_arrival %}
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">{% trans "Actual Arrival" %}:</small>
+                                    <p class="mb-0"><i class="fas fa-flag-checkered me-2"></i>{{ shipment.actual_arrival }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Transport Details -->
+                        <div class="col-md-6 mb-4">
+                            <h5 class="border-bottom pb-2">{% trans "Transport Details" %}</h5>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">{% trans "Transport Company" %}:</small>
+                                <p class="mb-0"><i class="fas fa-building me-2"></i>{{ shipment.company.name }}</p>
+                            </div>
+                            {% if shipment.driver %}
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">{% trans "Driver" %}:</small>
+                                    <p class="mb-0"><i class="fas fa-user me-2"></i>{{ shipment.driver }}</p>
+                                </div>
+                            {% endif %}
+                            {% if shipment.vehicle %}
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">{% trans "Vehicle" %}:</small>
+                                    <p class="mb-0"><i class="fas fa-truck me-2"></i>{{ shipment.vehicle }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Package Details -->
+                        <div class="col-md-6 mb-4">
+                            <h5 class="border-bottom pb-2">{% trans "Package Details" %}</h5>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">{% trans "Weight" %}:</small>
+                                <p class="mb-0"><i class="fas fa-weight-hanging me-2"></i>{{ shipment.weight }} kg</p>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">{% trans "Volume" %}:</small>
+                                <p class="mb-0"><i class="fas fa-box me-2"></i>{{ shipment.volume }} m³</p>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">{% trans "Package Count" %}:</small>
+                                <p class="mb-0"><i class="fas fa-boxes me-2"></i>{{ shipment.package_count }}</p>
+                            </div>
+                            {% if shipment.is_hazardous or shipment.requires_refrigeration %}
+                                <div class="mt-3">
+                                    {% if shipment.is_hazardous %}
+                                        <span class="badge bg-danger me-2">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>{% trans "Hazardous" %}
+                                        </span>
+                                    {% endif %}
+                                    {% if shipment.requires_refrigeration %}
+                                        <span class="badge bg-info">
+                                            <i class="fas fa-snowflake me-1"></i>{% trans "Refrigerated" %}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="col-md-6 mb-4">
+                            <h5 class="border-bottom pb-2">{% trans "Contact Information" %}</h5>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">{% trans "Sender" %}:</small>
+                                <p class="mb-1">{{ shipment.sender_name }}</p>
+                                <p class="mb-0"><i class="fas fa-phone me-2"></i>{{ shipment.sender_phone }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">{% trans "Receiver" %}:</small>
+                                <p class="mb-1">{{ shipment.receiver_name }}</p>
+                                <p class="mb-0"><i class="fas fa-phone me-2"></i>{{ shipment.receiver_phone }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="col-md-6 mb-4">
+                            <h5 class="border-bottom pb-2">{% trans "Additional Information" %}</h5>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">{% trans "Cost" %}:</small>
+                                <p class="mb-0"><i class="fas fa-dollar-sign me-2"></i>{{ shipment.cost }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">{% trans "Insurance Value" %}:</small>
+                                <p class="mb-0"><i class="fas fa-shield-alt me-2"></i>{{ shipment.insurance_value }}</p>
+                            </div>
+                        </div>
+
+                        {% if shipment.special_instructions %}
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2">{% trans "Special Instructions" %}</h5>
+                                <p class="mb-0">{{ shipment.special_instructions }}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="btn-group">
+                        {% if perms.logistics.change_shipment %}
+                            <a href="{% url 'logistics:shipment_update' pk=shipment.pk %}" class="btn btn-outline-primary">
+                                <i class="fas fa-edit me-2"></i>{% trans "Edit Shipment" %}
+                            </a>
+                        {% endif %}
+                        {% if perms.logistics.delete_shipment %}
+                            <a href="{% url 'logistics:shipment_delete' pk=shipment.pk %}" class="btn btn-outline-danger">
+                                <i class="fas fa-trash me-2"></i>{% trans "Delete Shipment" %}
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tracking Timeline -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-timeline me-2"></i>{% trans "Tracking Timeline" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if perms.logistics.add_trackingevent %}
+                        <div class="mb-4">
+                            <a href="{% url 'logistics:add_tracking_event' pk=shipment.pk %}" class="btn btn-success w-100">
+                                <i class="fas fa-plus me-2"></i>{% trans "Add Tracking Event" %}
+                            </a>
+                        </div>
+                    {% endif %}
+
+                    {% if tracking_events %}
+                        <div class="timeline">
+                            {% for event in tracking_events %}
+                                <div class="timeline-item">
+                                    <div class="timeline-badge {% if event.status == 'delivered' %}bg-success
+                                                              {% elif event.status == 'delayed' %}bg-warning
+                                                              {% elif event.status == 'cancelled' %}bg-danger
+                                                              {% else %}bg-info{% endif %}">
+                                        <i class="fas fa-circle"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-time">
+                                            <small>{{ event.timestamp|date:"d M Y H:i" }}</small>
+                                        </div>
+                                        <h6 class="mb-1">{{ event.get_status_display }}</h6>
+                                        <p class="mb-1"><i class="fas fa-location-dot me-2"></i>{{ event.location }}</p>
+                                        {% if event.details %}
+                                            <p class="mb-0 text-muted">{{ event.details }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>{% trans "No tracking events yet." %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+        padding: 20px 0;
+    }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 18px;
+        height: 100%;
+        width: 2px;
+        background: #e9ecef;
+    }
+    .timeline-item {
+        position: relative;
+        margin-bottom: 30px;
+        margin-left: 40px;
+    }
+    .timeline-badge {
+        position: absolute;
+        left: -40px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        text-align: center;
+        color: white;
+        line-height: 20px;
+    }
+    .timeline-badge i {
+        font-size: 10px;
+    }
+    .timeline-content {
+        padding: 15px;
+        border-radius: 4px;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+    }
+    .timeline-time {
+        margin-bottom: 5px;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}

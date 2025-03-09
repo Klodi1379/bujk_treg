@@ -1,0 +1,61 @@
+# English translations for Django messages
+
+msgid "Platforma Bujqësore"
+msgstr "Agricultural Platform"
+
+msgid "Katalogu"
+msgstr "Catalog"
+
+msgid "Paneli"
+msgstr "Dashboard"
+
+msgid "Dilni"
+msgstr "Logout"
+
+msgid "Logistics"
+msgstr "Logistics"
+
+msgid "Shipments"
+msgstr "Shipments"
+
+msgid "Warehouses"
+msgstr "Warehouses"
+
+msgid "Vehicles"
+msgstr "Vehicles"
+
+msgid "Transport Companies"
+msgstr "Transport Companies"
+
+msgid "Drivers"
+msgstr "Drivers"
+
+msgid "Profili"
+msgstr "Profile"
+
+msgid "Identifikohuni"
+msgstr "Login"
+
+msgid "Regjistrohuni"
+msgstr "Register"
+
+msgid "Kontakt"
+msgstr "Contact"
+
+msgid "Na ndiqni"
+msgstr "Follow us"
+
+msgid "Lidhja direkte mes fermerëve dhe blerësve"
+msgstr "Direct connection between farmers and buyers"
+
+msgid "Të gjitha të drejtat të rezervuara."
+msgstr "All rights reserved."
+
+msgid "Porositë e Mia"
+msgstr "My Orders"
+
+msgid "Produktet e Mia"
+msgstr "My Products"
+
+msgid "Gjuha"
+msgstr "Language"

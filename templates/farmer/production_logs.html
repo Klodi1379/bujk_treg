@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Regjistrat e Prodhimit - {{ farmer.farm_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-0">
+                <i class="fas fa-clipboard-list text-success me-2"></i>Regjistrat e Prodhimit
+            </h1>
+            <p class="lead text-muted">Historia e aktiviteteve të prodhimit në fermë</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{% url 'farmer:add_production_log' %}" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i>Shto Regjistër të Ri
+            </a>
+        </div>
+    </div>
+
+    {% if logs %}
+        <!-- Filtrat -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Kultura</label>
+                        <select name="crop" class="form-select">
+                            <option value="">Të gjitha</option>
+                            {% for crop in farmer.farmercrop_set.all %}
+                                <option value="{{ crop.crop.id }}" 
+                                        {% if request.GET.crop == crop.crop.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ crop.crop.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Aktiviteti</label>
+                        <select name="activity" class="form-select">
+                            <option value="">Të gjitha</option>
+                            {% for value, label in activity_choices %}
+                                <option value="{{ value }}"
+                                        {% if request.GET.activity == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="submit" class="btn btn-success d-block w-100">
+                            <i class="fas fa-filter me-2"></i>Filtro
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Regjistrat -->
+        <div class="timeline">
+            {% for log in logs %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 text-md-center border-end">
+                                <div class="timeline-date">
+                                    <h4 class="mb-1">{{ log.date|date:"d" }}</h4>
+                                    <p class="text-muted mb-0">{{ log.date|date:"F Y" }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h5 class="mb-1">{{ log.get_activity_type_display }}</h5>
+                                        <p class="text-muted mb-2">{{ log.crop.name }}</p>
+                                    </div>
+                                    <div class="btn-group">
+                                        <a href="{% url 'farmer:update_production_log' log.pk %}" 
+                                           class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'farmer:delete_production_log' log.pk %}" 
+                                           class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <p class="mb-3">{{ log.description }}</p>
+                                
+                                {% if log.notes %}
+                                    <p class="mb-3">
+                                        <small class="text-muted"><strong>Shënime:</strong> {{ log.notes }}</small>
+                                    </p>
+                                {% endif %}
+                                
+                                {% if log.photo %}
+                                    <img src="{{ log.photo.url }}" alt="{{ log.activity_type }}"
+                                         class="img-fluid rounded" style="max-height: 200px;">
+                                {% endif %}
+
+                                {% if log.blockchain_hash %}
+                                    <div class="mt-3">
+                                        <small class="text-muted">
+                                            <i class="fas fa-link me-1"></i>Hash Blockchain:
+                                            <code>{{ log.blockchain_hash }}</code>
+                                        </small>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+            <!-- Paginimi -->
+            {% if is_paginated %}
+                <nav aria-label="Navigimi i faqeve">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if request.GET.crop %}&crop={{ request.GET.crop }}{% endif %}{% if request.GET.activity %}&activity={{ request.GET.activity }}{% endif %}">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.crop %}&crop={{ request.GET.crop }}{% endif %}{% if request.GET.activity %}&activity={{ request.GET.activity }}{% endif %}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item disabled">
+                            <span class="page-link">
+                                Faqja {{ page_obj.number }} nga {{ page_obj.paginator.num_pages }}
+                            </span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.crop %}&crop={{ request.GET.crop }}{% endif %}{% if request.GET.activity %}&activity={{ request.GET.activity }}{% endif %}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.crop %}&crop={{ request.GET.crop }}{% endif %}{% if request.GET.activity %}&activity={{ request.GET.activity }}{% endif %}">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-clipboard-list fa-4x text-muted"></i>
+            </div>
+            <h4>Nuk ka regjistra të prodhimit ende</h4>
+            <p class="text-muted mb-4">Filloni të regjistroni aktivitetet tuaja të prodhimit për të mbajtur një histori të plotë.</p>
+            <a href="{% url 'farmer:add_production_log' %}" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i>Krijo Regjistrin e Parë
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

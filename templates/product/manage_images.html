@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Menaxho Imazhet - {{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Lista e imazheve -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-images me-2"></i>Imazhet e Produktit
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if product.images.exists %}
+                        <div class="row g-4">
+                            {% for image in product.images.all %}
+                                <div class="col-md-4">
+                                    <div class="card h-100">
+                                        <img src="{{ image.image.url }}" 
+                                             class="card-img-top"
+                                             alt="{{ image.alt_text }}"
+                                             style="height: 200px; object-fit: cover;">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                {% if image.is_primary %}
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check-circle me-1"></i>Imazh Kryesor
+                                                    </span>
+                                                {% else %}
+                                                    <button class="btn btn-sm btn-outline-success make-primary"
+                                                            data-image-id="{{ image.id }}"
+                                                            data-product-id="{{ product.id }}">
+                                                        Bëj Kryesor
+                                                    </button>
+                                                {% endif %}
+                                            </div>
+                                            {% if image.alt_text %}
+                                                <p class="small text-muted mb-3">{{ image.alt_text }}</p>
+                                            {% endif %}
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-sm btn-outline-primary edit-alt-text flex-grow-1"
+                                                        data-image-id="{{ image.id }}"
+                                                        data-alt-text="{{ image.alt_text|default:'' }}">
+                                                    <i class="fas fa-edit me-1"></i>Përshkrimi
+                                                </button>
+                                                <a href="{% url 'product:delete_image' image.id %}" 
+                                                   class="btn btn-sm btn-outline-danger"
+                                                   onclick="return confirm('A jeni i sigurt që dëshironi të fshini këtë imazh?')">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer bg-transparent">
+                                            <small class="text-muted">
+                                                Ngarkuar më {{ image.created_at|date:"d/m/Y" }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-images fa-3x text-muted mb-3"></i>
+                            <p class="text-muted mb-0">Nuk ka imazhe për këtë produkt.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Forma për ngarkimin e imazheve -->
+        <div class="col-lg-4">
+            <div class="card sticky-top" style="top: 1rem;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-upload me-2"></i>Ngarko Imazhe të Reja
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" class="upload-form">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+
+                        <div id="imagePreview" class="mt-3 text-center d-none">
+                            <h6 class="mb-2">Pamja paraprake</h6>
+                            <img src="" alt="Preview" class="img-fluid rounded mb-2" style="max-height: 200px;">
+                        </div>
+
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <small>
+                                Formatet e pranuara: JPG, PNG<br>
+                                Madhësia maksimale: 5MB<br>
+                                Dimensionet e rekomanduara: 800x800px
+                            </small>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-cloud-upload-alt me-2"></i>Ngarko Imazhin
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal për përditësimin e tekstit alternativ -->
+<div class="modal fade" id="altTextModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Përditëso Përshkrimin e Imazhit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="altTextForm">
+                    <div class="mb-3">
+                        <label for="altText" class="form-label">Teksti Alternativ</label>
+                        <input type="text" class="form-control" id="altText" name="alt_text">
+                        <div class="form-text">
+                            Shkruani një përshkrim të shkurtër të imazhit për të përmirësuar 
+                            aksesueshmërinë dhe SEO.
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Mbyll</button>
+                <button type="button" class="btn btn-success" id="saveAltText">Ruaj</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Previewing uploaded images
+    const imageInput = document.querySelector('input[type="file"]');
+    const previewContainer = document.getElementById('imagePreview');
+    const previewImage = previewContainer.querySelector('img');
+    
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file size
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Madhësia e imazhit nuk mund të jetë më e madhe se 5MB!');
+                    imageInput.value = '';
+                    previewContainer.classList.add('d-none');
+                    return;
+                }
+                
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewContainer.classList.remove('d-none');
+                }
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.classList.add('d-none');
+            }
+        });
+    }
+
+    // Handling alt text updates
+    const modal = new bootstrap.Modal(document.getElementById('altTextModal'));
+    const altTextInput = document.getElementById('altText');
+    let currentImageId = null;
+
+    document.querySelectorAll('.edit-alt-text').forEach(button => {
+        button.addEventListener('click', function() {
+            currentImageId = this.dataset.imageId;
+            altTextInput.value = this.dataset.altText;
+            modal.show();
+        });
+    });
+
+    document.getElementById('saveAltText').addEventListener('click', function() {
+        if (currentImageId) {
+            fetch(`/api/product/image/${currentImageId}/update-alt-text/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({
+                    alt_text: altTextInput.value
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Ndodhi një gabim gjatë përditësimit të përshkrimit.');
+                }
+            });
+        }
+        modal.hide();
+    });
+
+    // Making an image primary
+    document.querySelectorAll('.make-primary').forEach(button => {
+        button.addEventListener('click', function() {
+            const imageId = this.dataset.imageId;
+            const productId = this.dataset.productId;
+
+            fetch(`/api/product/${productId}/image/${imageId}/make-primary/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Ndodhi një gabim gjatë përditësimit të imazhit kryesor.');
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

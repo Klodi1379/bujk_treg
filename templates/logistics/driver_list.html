@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Drivers{% endblock %}
+
+{% block content %}
+  <h1>Drivers</h1>
+  <ul>
+    {% for driver in drivers %}
+      <li>
+        <a href="{% url 'logistics:driver_detail' pk=driver.pk %}">{{ driver.user.get_full_name }}</a>
+      </li>
+    {% empty %}
+      <li>No drivers found.</li>
+    {% endfor %}
+  </ul>
+  <a href="{% url 'logistics:driver_create' %}">Add Driver</a>
+{% endblock %}

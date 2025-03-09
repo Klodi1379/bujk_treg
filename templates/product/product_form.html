@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {% if form.instance.pk %}
+        Përditëso Produktin - {{ form.instance.name }}
+    {% else %}
+        Shto Produkt të Ri
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h1 class="card-title text-center mb-4">
+                        {% if form.instance.pk %}
+                            <i class="fas fa-edit text-success me-2"></i>Përditëso Produktin
+                        {% else %}
+                            <i class="fas fa-plus-circle text-success me-2"></i>Shto Produkt të Ri
+                        {% endif %}
+                    </h1>
+
+                    <form method="post" enctype="multipart/form-data" class="product-form">
+                        {% csrf_token %}
+                        
+                        <!-- Informacionet bazë -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>Informacionet Bazë
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ form.name|as_crispy_field }}
+                                        {{ form.category|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.crop|as_crispy_field }}
+                                        {{ form.is_organic|as_crispy_field }}
+                                    </div>
+                                </div>
+                                {{ form.description|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <!-- Çmimi dhe disponueshmëria -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-tag me-2"></i>Çmimi dhe Disponueshmëria
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        {{ form.price|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.discount_price|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.unit|as_crispy_field }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        {{ form.minimum_order|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.stock|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.availability|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Datat dhe detajet -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-calendar me-2"></i>Datat dhe Detajet
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ form.harvest_date|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.expiry_date|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Imazhet -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-images me-2"></i>Imazhet e Produktit
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                {% if form.instance.pk %}
+                                    <div class="row mb-3">
+                                        {% for image in form.instance.images.all %}
+                                            <div class="col-md-3 mb-3">
+                                                <div class="position-relative">
+                                                    <img src="{{ image.image.url }}" 
+                                                         class="img-thumbnail"
+                                                         alt="{{ image.alt_text }}">
+                                                    {% if image.is_primary %}
+                                                        <span class="badge bg-success position-absolute top-0 end-0 m-2">
+                                                            <i class="fas fa-check-circle"></i> Kryesor
+                                                        </span>
+                                                    {% endif %}
+                                                    <div class="d-grid gap-2 mt-2">
+                                                        <a href="{% url 'product:delete_image' image.pk %}" 
+                                                           class="btn btn-sm btn-outline-danger"
+                                                           onclick="return confirm('A jeni i sigurt që dëshironi të fshini këtë imazh?')">
+                                                            <i class="fas fa-trash"></i> Fshi
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                {{ image_form|crispy }}
+                                <small class="text-muted d-block mt-2">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Imazhi i parë i ngarkuar do të jetë imazhi kryesor i produktit.
+                                    Formatet e pranuara: JPG, PNG. Madhësia maksimale: 5MB.
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Butonat e veprimit -->
+                        <div class="row">
+                            <div class="col-md-6 offset-md-3">
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        {% if form.instance.pk %}
+                                            <i class="fas fa-save me-2"></i>Ruaj Ndryshimet
+                                        {% else %}
+                                            <i class="fas fa-plus me-2"></i>Shto Produktin
+                                        {% endif %}
+                                    </button>
+                                    <a href="{% url 'product:list' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-2"></i>Anullo
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.product-form');
+    
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const price = parseFloat(form.querySelector('[name="price"]').value);
+            const discountPrice = parseFloat(form.querySelector('[name="discount_price"]').value);
+            const stock = parseFloat(form.querySelector('[name="stock"]').value);
+            const minOrder = parseFloat(form.querySelector('[name="minimum_order"]').value);
+            
+            // Validimi i çmimit
+            if (discountPrice && discountPrice >= price) {
+                e.preventDefault();
+                alert('Çmimi me ulje duhet të jetë më i vogël se çmimi normal!');
+                return;
+            }
+            
+            // Validimi i sasisë minimale
+            if (minOrder > stock) {
+                e.preventDefault();
+                alert('Sasia minimale e porosisë nuk mund të jetë më e madhe se sasia në gjendje!');
+                return;
+            }
+        });
+
+        // Preview i imazhit
+        const imageInput = form.querySelector('input[type="file"]');
+        if (imageInput) {
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('Madhësia e imazhit nuk mund të jetë më e madhe se 5MB!');
+                        imageInput.value = '';
+                    }
+                }
+            });
+        }
+    }
+});
+</script>
+{% endblock %}

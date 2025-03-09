@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shporta e Blerjeve{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+            <i class="fas fa-shopping-cart text-success me-2"></i>Shporta e Blerjeve
+        </h1>
+        <a href="{% url 'product:list' %}" class="btn btn-outline-success">
+            <i class="fas fa-arrow-left me-2"></i>Vazhdo Blerjet
+        </a>
+    </div>
+
+    {% if cart.items.exists %}
+        <!-- Produktet në shportë -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        {% for item in cart.items.all %}
+                            <div class="cart-item {% if not forloop.last %}border-bottom mb-3 pb-3{% endif %}">
+                                <div class="row align-items-center">
+                                    <!-- Imazhi -->
+                                    <div class="col-md-2">
+                                        {% if item.product.images.exists %}
+                                            <img src="{{ item.product.images.first.image.url }}" 
+                                                 alt="{{ item.product.name }}"
+                                                 class="img-fluid rounded">
+                                        {% else %}
+                                            <img src="{% static 'images/product-placeholder.jpg' %}" 
+                                                 alt="{{ item.product.name }}"
+                                                 class="img-fluid rounded">
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Detajet -->
+                                    <div class="col-md-4">
+                                        <h5 class="mb-1">{{ item.product.name }}</h5>
+                                        <p class="text-muted mb-2">
+                                            <i class="fas fa-user me-1"></i>{{ item.product.farmer.farm_name }}
+                                        </p>
+                                        <p class="mb-0">
+                                            <span class="text-success">
+                                                {{ item.unit_price }} ALL
+                                            </span> / {{ item.product.get_unit_display }}
+                                        </p>
+                                    </div>
+                                    
+                                    <!-- Sasia -->
+                                    <div class="col-md-3">
+                                        <form method="post" action="{% url 'marketplace:update_cart_item' item.id %}" 
+                                              class="d-flex align-items-center quantity-form">
+                                            {% csrf_token %}
+                                            <div class="input-group">
+                                                <button type="button" class="btn btn-outline-secondary decrease-quantity">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                                <input type="number" 
+                                                       name="quantity"
+                                                       value="{{ item.quantity }}"
+                                                       min="{{ item.product.minimum_order }}"
+                                                       max="{{ item.product.stock }}"
+                                                       step="0.1"
+                                                       class="form-control text-center quantity-input">
+                                                <button type="button" class="btn btn-outline-secondary increase-quantity">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </div>
+                                            <button type="submit" class="btn btn-success ms-2 update-quantity">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    
+                                    <!-- Nëntotali dhe veprimet -->
+                                    <div class="col-md-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">{{ item.subtotal }} ALL</h5>
+                                            <a href="{% url 'marketplace:remove_from_cart' item.id %}" 
+                                               class="btn btn-outline-danger btn-sm"
+                                               onclick="return confirm('A jeni i sigurt që dëshironi ta hiqni këtë produkt nga shporta?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Përmbledhja e porosisë -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-calculator me-2"></i>Përmbledhje e Porosisë
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Nëntotali:</span>
+                            <strong>{{ cart.total }} ALL</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Transporti:</span>
+                            <strong>Falas</strong>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <h5>Totali:</h5>
+                            <h5 class="text-success">{{ cart.total }} ALL</h5>
+                        </div>
+                        <div class="d-grid">
+                            <a href="{% url 'marketplace:checkout' %}" class="btn btn-success btn-lg">
+                                <i class="fas fa-shopping-cart me-2"></i>Vazhdo me Porosinë
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- Shporta e zbrazët -->
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-shopping-cart fa-4x text-muted"></i>
+            </div>
+            <h4>Shporta juaj është e zbrazët</h4>
+            <p class="text-muted mb-4">
+                Shikoni produktet tona dhe filloni blerjet tuaja.
+            </p>
+            <a href="{% url 'product:list' %}" class="btn btn-success">
+                <i class="fas fa-shopping-basket me-2"></i>Shiko Produktet
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Kontrollo sasinë
+    document.querySelectorAll('.quantity-form').forEach(form => {
+        const input = form.querySelector('.quantity-input');
+        const decreaseBtn = form.querySelector('.decrease-quantity');
+        const increaseBtn = form.querySelector('.increase-quantity');
+        const updateBtn = form.querySelector('.update-quantity');
+        
+        const min = parseFloat(input.min);
+        const max = parseFloat(input.max);
+        const step = parseFloat(input.step);
+        
+        // Rrit sasinë
+        increaseBtn.addEventListener('click', () => {
+            let value = parseFloat(input.value);
+            if (value + step <= max) {
+                input.value = (value + step).toFixed(1);
+                updateBtn.classList.add('btn-pulse');
+            }
+        });
+        
+        // Ul sasinë
+        decreaseBtn.addEventListener('click', () => {
+            let value = parseFloat(input.value);
+            if (value - step >= min) {
+                input.value = (value - step).toFixed(1);
+                updateBtn.classList.add('btn-pulse');
+            }
+        });
+        
+        // Validimi manual
+        input.addEventListener('change', () => {
+            let value = parseFloat(input.value);
+            if (value < min) input.value = min;
+            if (value > max) input.value = max;
+            updateBtn.classList.add('btn-pulse');
+        });
+    });
+});
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.btn-pulse {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+</style>
+{% endblock %}

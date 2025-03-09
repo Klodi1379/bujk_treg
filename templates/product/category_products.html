@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ category.name }} - Produktet Bujqësore{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header i kategorisë -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'product:list' %}" class="text-success">
+                            <i class="fas fa-home me-1"></i>Produktet
+                        </a>
+                    </li>
+                    {% if category.parent %}
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'product:category_products' category.parent.slug %}" class="text-success">
+                                {{ category.parent.name }}
+                            </a>
+                        </li>
+                    {% endif %}
+                    <li class="breadcrumb-item active" aria-current="page">
+                        {{ category.name }}
+                    </li>
+                </ol>
+            </nav>
+            <div class="d-flex align-items-center gap-3">
+                {% if category.image %}
+                    <img src="{{ category.image.url }}" 
+                         alt="{{ category.name }}"
+                         class="rounded"
+                         style="width: 80px; height: 80px; object-fit: cover;">
+                {% endif %}
+                <div>
+                    <h1 class="mb-2">{{ category.name }}</h1>
+                    {% if category.description %}
+                        <p class="lead mb-0">{{ category.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <div class="dropdown">
+                <button class="btn btn-outline-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-sort me-2"></i>Rendit sipas
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item {% if request.GET.sort == 'price_asc' %}active{% endif %}" 
+                           href="?sort=price_asc">
+                            <i class="fas fa-sort-amount-down-alt me-2"></i>Çmimi (i ulët në të lartë)
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item {% if request.GET.sort == 'price_desc' %}active{% endif %}" 
+                           href="?sort=price_desc">
+                            <i class="fas fa-sort-amount-up me-2"></i>Çmimi (i lartë në të ulët)
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item {% if request.GET.sort == 'name' %}active{% endif %}" 
+                           href="?sort=name">
+                            <i class="fas fa-sort-alpha-down me-2"></i>Emri (A-Z)
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item {% if request.GET.sort == 'date' %}active{% endif %}" 
+                           href="?sort=date">
+                            <i class="fas fa-calendar-alt me-2"></i>Më të rejat
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nënkategoritë -->
+    {% if category.children.exists %}
+        <div class="mb-4">
+            <h5 class="mb-3">Nënkategoritë</h5>
+            <div class="row g-3">
+                {% for subcategory in category.children.all %}
+                    <div class="col-6 col-md-3">
+                        <a href="{% url 'product:category_products' subcategory.slug %}" 
+                           class="card text-decoration-none h-100">
+                            {% if subcategory.image %}
+                                <img src="{{ subcategory.image.url }}" 
+                                     class="card-img-top"
+                                     alt="{{ subcategory.name }}"
+                                     style="height: 150px; object-fit: cover;">
+                            {% endif %}
+                            <div class="card-body text-center">
+                                <h6 class="card-title text-success mb-0">{{ subcategory.name }}</h6>
+                                <small class="text-muted">
+                                    {{ subcategory.products.count }} produkte
+                                </small>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Lista e produkteve -->
+    {% if products %}
+        <div class="row g-4">
+            {% for product in products %}
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    <div class="card h-100 product-card">
+                        {% if product.images.exists %}
+                            <img src="{{ product.images.first.image.url }}" 
+                                 class="card-img-top"
+                                 alt="{{ product.name }}"
+                                 style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <img src="{% static 'images/product-placeholder.jpg' %}" 
+                                 class="card-img-top"
+                                 alt="{{ product.name }}"
+                                 style="height: 200px; object-fit: cover;">
+                        {% endif %}
+
+                        <div class="card-body">
+                            <h5 class="card-title mb-1">{{ product.name }}</h5>
+                            <p class="text-muted small mb-2">
+                                <i class="fas fa-user me-1"></i>{{ product.farmer.farm_name }}
+                            </p>
+
+                            <div class="mb-2">
+                                {% if product.is_organic %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-leaf me-1"></i>Organik
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    {% if product.discount_price %}
+                                        <span class="h5 text-success mb-0">
+                                            {{ product.discount_price }} ALL
+                                        </span>
+                                        <small class="text-muted text-decoration-line-through">
+                                            {{ product.price }} ALL
+                                        </small>
+                                    {% else %}
+                                        <span class="h5 text-success mb-0">
+                                            {{ product.price }} ALL
+                                        </span>
+                                    {% endif %}
+                                    <small class="text-muted">/ {{ product.get_unit_display }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted d-block">Min. porosi:</small>
+                                    <small>{{ product.minimum_order }} {{ product.get_unit_display }}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-transparent">
+                            <div class="d-grid">
+                                <a href="{% url 'product:detail' product.slug %}" 
+                                   class="btn btn-outline-success">
+                                    <i class="fas fa-info-circle me-2"></i>Detaje
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Paginimi -->
+        {% if is_paginated %}
+            <nav class="mt-4" aria-label="Navigimi i faqeve">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            Faqja {{ page_obj.number }} nga {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-box-open fa-4x text-muted"></i>
+            </div>
+            <h4>Nuk ka produkte në këtë kategori</h4>
+            <p class="text-muted">
+                Aktualisht nuk ka produkte të disponueshme në kategorinë "{{ category.name }}".
+                Ju lutemi kontrolloni më vonë ose eksploroni kategoritë e tjera.
+            </p>
+            <a href="{% url 'product:list' %}" class="btn btn-success">
+                <i class="fas fa-arrow-left me-2"></i>Kthehu te Produktet
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

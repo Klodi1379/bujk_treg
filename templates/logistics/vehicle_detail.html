@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ vehicle }}{% endblock %}
+
+{% block content %}
+<h1>{{ vehicle }}</h1>
+  <p>Type: {{ vehicle.vehicle_type }}</p>
+  <p>Plate Number: {{ vehicle.plate_number }}</p>
+  <p>Capacity: {{ vehicle.capacity }}</p>
+  <p>Availability: {{ vehicle.availability }}</p>
+
+  <a href="{% url 'logistics:vehicle_update' pk=vehicle.pk %}">Edit</a>
+  <a href="{% url 'logistics:vehicle_delete' pk=vehicle.pk %}">Delete</a>
+{% endblock %}

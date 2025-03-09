@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {% if form.instance.pk %}
+        Përditëso Regjistrin e Prodhimit
+    {% else %}
+        Shto Regjistër të Ri Prodhimi
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h1 class="card-title text-center mb-4">
+                        {% if form.instance.pk %}
+                            <i class="fas fa-edit text-success me-2"></i>Përditëso Regjistrin
+                        {% else %}
+                            <i class="fas fa-plus-circle text-success me-2"></i>Shto Regjistër të Ri
+                        {% endif %}
+                    </h1>
+
+                    <form method="post" enctype="multipart/form-data" class="production-log-form">
+                        {% csrf_token %}
+                        
+                        <!-- Informacionet bazë -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>Informacionet e Aktivitetit
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ form.crop|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.activity_type|as_crispy_field }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ form.date|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Përshkrimi dhe shënimet -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-align-left me-2"></i>Detajet
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                {{ form.description|as_crispy_field }}
+                                {{ form.notes|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <!-- Foto dhe dokumentime -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-camera me-2"></i>Foto dhe Dokumentime
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-4">
+                                        {% if form.instance.photo %}
+                                            <img src="{{ form.instance.photo.url }}" 
+                                                 alt="Foto aktuale"
+                                                 class="img-fluid rounded mb-3">
+                                            <div class="form-check mb-3">
+                                                <input type="checkbox" name="clear_photo" 
+                                                       id="clear_photo" class="form-check-input">
+                                                <label for="clear_photo" class="form-check-label">
+                                                    Fshi foton
+                                                </label>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-8">
+                                        {{ form.photo|as_crispy_field }}
+                                        <small class="text-muted">
+                                            Ngarko një foto që dokumenton aktivitetin (opsionale).
+                                            Formatet e pranuara: JPG, PNG. Madhësia maksimale: 5MB.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Butonat e veprimit -->
+                        <div class="row">
+                            <div class="col-md-6 offset-md-3">
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        {% if form.instance.pk %}
+                                            <i class="fas fa-save me-2"></i>Ruaj Ndryshimet
+                                        {% else %}
+                                            <i class="fas fa-plus me-2"></i>Shto Regjistrin
+                                        {% endif %}
+                                    </button>
+                                    <a href="{% url 'farmer:production_logs' %}" 
+                                       class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-2"></i>Anullo
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Preview i imazhit të zgjedhur
+    const imageInput = document.querySelector('input[type="file"]');
+    const previewContainer = document.querySelector('.col-md-4');
+    
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    let preview = previewContainer.querySelector('img');
+                    if (!preview) {
+                        preview = document.createElement('img');
+                        preview.classList.add('img-fluid', 'rounded', 'mb-3');
+                        previewContainer.insertBefore(preview, previewContainer.firstChild);
+                    }
+                    preview.src = e.target.result;
+                }
+                
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+    }
+    
+    // Validimi i formës
+    const form = document.querySelector('.production-log-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const description = form.querySelector('[name="description"]');
+            if (description && description.value.trim() === '') {
+                e.preventDefault();
+                alert('Ju lutem plotësoni një përshkrim për aktivitetin!');
+                description.focus();
+            }
+        });
+    }
+    
+    // Përditësimi i fushave në bazë të aktivitetit
+    const activitySelect = document.querySelector('[name="activity_type"]');
+    if (activitySelect) {
+        activitySelect.addEventListener('change', function(e) {
+            const descriptionLabel = document.querySelector('label[for="description"]');
+            let placeholder = 'Përshkruani aktivitetin...';
+            
+            switch(e.target.value) {
+                case 'planting':
+                    placeholder = 'Përshkruani detajet e mbjelljes (p.sh., lloji i farës, thellësia, distanca)...';
+                    break;
+                case 'fertilizing':
+                    placeholder = 'Përshkruani plehrat e përdorur dhe sasinë...';
+                    break;
+                case 'irrigating':
+                    placeholder = 'Përshkruani metodën e ujitjes dhe sasinë...';
+                    break;
+                case 'pest_control':
+                    placeholder = 'Përshkruani problemin dhe trajtimin e aplikuar...';
+                    break;
+                case 'harvesting':
+                    placeholder = 'Përshkruani sasinë e vjelë dhe cilësinë...';
+                    break;
+            }
+            
+            document.querySelector('[name="description"]').placeholder = placeholder;
+        });
+    }
+});
+</script>
+{% endblock %}

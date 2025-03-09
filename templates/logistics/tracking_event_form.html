@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% trans "Add Tracking Event" %} - {{ shipment.tracking_number }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-location-dot me-2"></i>{% trans "Add Tracking Event" %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title mb-4">{{ shipment.tracking_number }} - {{ shipment.origin }} → {{ shipment.destination }}</h5>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-plus me-2"></i>{% trans "Add Event" %}
+                            </button>
+                            <a href="{% url 'logistics:shipment_detail' pk=shipment.pk %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>{% trans "Cancel" %}
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

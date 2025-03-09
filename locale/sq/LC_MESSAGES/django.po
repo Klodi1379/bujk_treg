@@ -1,0 +1,68 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\\n"
+"Report-Msgid-Bugs-To: \\n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n"
+"Language-Team: LANGUAGE <LL@li.org>\\n"
+"Language: sq\\n"
+"MIME-Version: 1.0\\n"
+"Content-Type: text/plain; charset=UTF-8\\n"
+"Content-Transfer-Encoding: 8bit\\n"
+
+#: templates/base.html:6
+msgid "Platforma Bujqësore"
+msgstr "Platforma Bujqësore - AL"
+
+#: templates/base.html:24
+msgid "Katalogu"
+msgstr "Katalogu - AL"
+
+#: templates/base.html:29
+msgid "Paneli"
+msgstr "Paneli - AL"
+
+#: templates/base.html:32
+msgid "Produktet e Mia"
+msgstr "Produktet e Mia"
+
+#: templates/base.html:36
+msgid "Porositë e Mia"
+msgstr "Porositë e Mia"
+
+#: templates/base.html:40
+msgid "Logistics"
+msgstr "Logjistika"
+
+#: templates/base.html:60
+msgid "Profili"
+msgstr "Profili"
+
+#: templates/base.html:66
+msgid "Dilni"
+msgstr "Dilni - AL"
+
+#: templates/base.html:71
+msgid "Identifikohuni"
+msgstr "Identifikohuni"
+
+#: templates/base.html:74
+msgid "Regjistrohuni"
+msgstr "Regjistrohuni"
+
+#: templates/base.html:95
+msgid "Kontakt"
+msgstr "Kontakt"
+
+#: templates/base.html:102
+msgid "Na ndiqni"
+msgstr "Na ndiqni"
+
+#: templates/base.html:110
+msgid "Të gjitha të drejtat të rezervuara."
+msgstr "Të gjitha të drejtat të rezervuara."
+
+#: templates/base.html:94
+msgid "Lidhja direkte mes fermerëve dhe blerësve"
+msgstr "Lidhja direkte mes fermerëve dhe blerësve"
