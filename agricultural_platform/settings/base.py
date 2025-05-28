@@ -1,3 +1,6 @@
+"""
+Base settings for agricultural platform project.
+"""
 from pathlib import Path
 import os
 from dotenv import load_dotenv
@@ -6,15 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-local-development-key-change-in-production')
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Application definition
 INSTALLED_APPS = [
@@ -25,22 +20,30 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    'django.contrib.sitemaps',
     
     # Third party apps
     'crispy_forms',
     'crispy_bootstrap5',
+    'django_filters',
     'widget_tweaks',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
+    'django_extensions',
     
     # Local apps
     'farmer',
     'product',
     'marketplace',
     'logistics',
-    'core',
+    'core',  # New core app for shared functionality
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # For static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -63,21 +66,14 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'core.context_processors.site_context',
+                'core.context_processors.site_context',  # Custom context processor
             ],
         },
     },
 ]
 
 WSGI_APPLICATION = 'agricultural_platform.wsgi.application'
-
-# Database - Using SQLite for local development
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': str(BASE_DIR / 'db.sqlite3'),
-    }
-}
+ASGI_APPLICATION = 'agricultural_platform.asgi.application'
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -114,12 +110,13 @@ LOCALE_PATHS = [
     BASE_DIR / 'locale',
 ]
 
-# Static files (CSS, JavaScript, Images)
+# Static files configuration
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Static files storage
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
@@ -132,17 +129,53 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
+# Django REST Framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/hour',
+        'user': '1000/hour'
+    }
+}
+
 # Sites framework
 SITE_ID = 1
 
 # Session settings
 SESSION_COOKIE_AGE = 86400  # 24 hours
+SESSION_COOKIE_SECURE = False  # Set to True in production
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 
 # CSRF settings
+CSRF_COOKIE_SECURE = False  # Set to True in production
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'
+
+# Cache configuration (Redis recommended for production)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
 
 # Logging configuration
 LOGGING = {
@@ -172,19 +205,39 @@ LOGGING = {
         },
     },
     'root': {
-        'handlers': ['console'],
+        'handlers': ['console', 'file'],
         'level': 'INFO',
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'farmer': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'product': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'marketplace': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'logistics': {
+            'handlers': ['console', 'file'],
             'level': 'INFO',
             'propagate': False,
         },
     },
 }
 
-# Email configuration (console backend for development)
+# Email configuration (update for production)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'noreply@agricultural-platform.com'
 
@@ -193,12 +246,5 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
 
-# Development settings for Django Debug Toolbar (if installed)
-if DEBUG:
-    try:
-        import debug_toolbar
-        INSTALLED_APPS.append('debug_toolbar')
-        MIDDLEWARE.insert(1, 'debug_toolbar.middleware.DebugToolbarMiddleware')
-        INTERNAL_IPS = ['127.0.0.1', 'localhost']
-    except ImportError:
-        pass
+# Custom user model (if needed in future)
+# AUTH_USER_MODEL = 'core.User'

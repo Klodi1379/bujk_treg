@@ -1,0 +1,1102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shporta Inteligjente - {{ site_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.smart-cart {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    min-height: 100vh;
+    padding: 20px 0;
+}
+
+.cart-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.cart-header {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.cart-item {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.cart-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+.cart-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(135deg, #198754, #146c43);
+}
+
+.product-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    background: #f8f9fa;
+    border-radius: 25px;
+    padding: 5px;
+}
+
+.quantity-btn {
+    width: 35px;
+    height: 35px;
+    border: none;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    color: #198754;
+    font-weight: bold;
+}
+
+.quantity-btn:hover {
+    background: #198754;
+    color: white;
+    transform: scale(1.1);
+}
+
+.quantity-input {
+    border: none;
+    background: transparent;
+    text-align: center;
+    width: 60px;
+    font-weight: bold;
+}
+
+.remove-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.cart-item:hover .remove-btn {
+    opacity: 1;
+}
+
+.cart-summary {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    position: sticky;
+    top: 20px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.summary-row:last-child {
+    border-bottom: none;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #198754;
+}
+
+.promo-section {
+    background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.checkout-btn {
+    background: linear-gradient(135deg, #198754, #146c43);
+    border: none;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 25px;
+    font-weight: bold;
+    width: 100%;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.checkout-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.checkout-btn:hover::before {
+    left: 100%;
+}
+
+.checkout-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(25,135,84,0.3);
+}
+
+.smart-recommendations {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-top: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.recommendation-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid #f0f0f0;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.recommendation-item:hover {
+    background: #f8f9fa;
+    border-color: #198754;
+    transform: translateX(5px);
+}
+
+.savings-calculator {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.delivery-options {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.delivery-option {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.delivery-option:hover,
+.delivery-option.selected {
+    border-color: #198754;
+    background: #f0f8f0;
+}
+
+.empty-cart {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.cart-progress {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.progress-steps::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #e9ecef;
+    z-index: 1;
+}
+
+.progress-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 2px;
+    background: #198754;
+    z-index: 2;
+    transition: width 0.5s ease;
+}
+
+.progress-step {
+    background: white;
+    border: 3px solid #e9ecef;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 3;
+    transition: all 0.3s ease;
+}
+
+.progress-step.completed {
+    background: #198754;
+    border-color: #198754;
+    color: white;
+}
+
+.progress-step.current {
+    border-color: #198754;
+    background: white;
+    color: #198754;
+    animation: pulse 2s infinite;
+}
+
+.smart-totals {
+    background: linear-gradient(135deg, #198754, #146c43);
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.total-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.total-item:last-child {
+    border-top: 1px solid rgba(255,255,255,0.3);
+    padding-top: 10px;
+    margin-bottom: 0;
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+.farmer-group {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border-left: 4px solid #198754;
+}
+
+.farmer-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.farmer-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 15px;
+    border: 3px solid #198754;
+}
+
+.eco-impact {
+    background: linear-gradient(135deg, #00b894, #00a085);
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.impact-item {
+    margin-bottom: 10px;
+}
+
+.impact-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    display: block;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@media (max-width: 768px) {
+    .cart-item {
+        padding: 15px;
+    }
+    
+    .product-image {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .cart-summary {
+        position: static;
+        margin-top: 20px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="smart-cart">
+    <div class="container cart-container">
+        <!-- Progress Indicator -->
+        <div class="cart-progress">
+            <div class="progress-steps">
+                <div class="progress-line" style="width: 33%;"></div>
+                <div class="progress-step completed">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="progress-step current">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="progress-step">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <div class="progress-step">
+                    <i class="fas fa-truck"></i>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between mt-2">
+                <small>Shporta</small>
+                <small>Kontrollo</small>
+                <small>Pagesë</small>
+                <small>Dorëzim</small>
+            </div>
+        </div>
+
+        <!-- Cart Header -->
+        <div class="cart-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2 class="mb-2">
+                        <i class="fas fa-shopping-basket text-success me-2"></i>
+                        Shporta Juaj
+                    </h2>
+                    <p class="text-muted mb-0">
+                        <span id="cartItemCount">{{ cart_items.count }}</span> produkte nga 
+                        <span id="farmerCount">{{ farmers_count }}</span> fermerë
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <button class="btn btn-outline-success me-2" onclick="saveForLater()">
+                        <i class="fas fa-heart me-2"></i>Ruaj për më vonë
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="clearCart()">
+                        <i class="fas fa-trash me-2"></i>Zbraz shportën
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Cart Items by Farmer -->
+                {% if cart_items %}
+                    {% for farmer, items in items_by_farmer.items %}
+                    <div class="farmer-group">
+                        <div class="farmer-header">
+                            {% if farmer.profile_image %}
+                                <img src="{{ farmer.profile_image.url }}" class="farmer-avatar" alt="{{ farmer.farm_name }}">
+                            {% else %}
+                                <div class="farmer-avatar bg-success d-flex align-items-center justify-content-center text-white">
+                                    {{ farmer.farm_name|first }}
+                                </div>
+                            {% endif %}
+                            <div class="flex-grow-1">
+                                <h5 class="mb-1">{{ farmer.farm_name }}</h5>
+                                <small class="text-muted">
+                                    <i class="fas fa-map-marker-alt me-1"></i>{{ farmer.location.city|default:"Shqipëri" }}
+                                    <span class="ms-3">
+                                        <i class="fas fa-star text-warning me-1"></i>4.8 (125 vlerësime)
+                                    </span>
+                                </small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-success">{{ items|length }} produkte</span>
+                            </div>
+                        </div>
+
+                        {% for item in items %}
+                        <div class="cart-item" data-item-id="{{ item.id }}" data-product-id="{{ item.product.id }}">
+                            <button class="remove-btn" onclick="removeItem({{ item.id }})" title="Hiq nga shporta">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            
+                            <div class="row align-items-center">
+                                <div class="col-md-2">
+                                    <div class="product-image">
+                                        {% if item.product.images.exists %}
+                                            <img src="{{ item.product.images.first.image.url }}" 
+                                                 class="w-100 h-100" style="object-fit: cover;" 
+                                                 alt="{{ item.product.name }}">
+                                        {% else %}
+                                            <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center">
+                                                <i class="fas fa-image text-muted"></i>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% if item.product.is_organic %}
+                                            <div class="position-absolute top-0 start-0 p-1">
+                                                <span class="badge bg-warning text-dark" style="font-size: 10px;">BIO</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <h6 class="mb-1">
+                                        <a href="{% url 'product:detail' item.product.slug %}" class="text-decoration-none text-dark">
+                                            {{ item.product.name }}
+                                        </a>
+                                    </h6>
+                                    <small class="text-muted">{{ item.product.description|truncatewords:10 }}</small>
+                                    
+                                    {% if item.product.harvest_date %}
+                                        <div class="mt-1">
+                                            <small class="text-success">
+                                                <i class="fas fa-calendar-alt me-1"></i>
+                                                Korrur më {{ item.product.harvest_date|date:"d M" }}
+                                            </small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-2">
+                                    <div class="text-center">
+                                        <div class="fw-bold text-success">{{ item.unit_price }} ALL</div>
+                                        <small class="text-muted">per {{ item.product.get_unit_display }}</small>
+                                        
+                                        {% if item.product.discount_price %}
+                                            <div>
+                                                <small class="text-decoration-line-through text-muted">{{ item.product.price }} ALL</small>
+                                                <span class="badge bg-danger ms-1">-{{ item.product.discount_percentage }}%</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-2">
+                                    <div class="quantity-controls">
+                                        <button class="quantity-btn" onclick="updateQuantity({{ item.id }}, 'decrease')">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" class="quantity-input" value="{{ item.quantity|floatformat:1 }}" 
+                                               min="{{ item.product.minimum_order }}" max="{{ item.product.stock }}"
+                                               onchange="updateQuantity({{ item.id }}, this.value)">
+                                        <button class="quantity-btn" onclick="updateQuantity({{ item.id }}, 'increase')">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                    <div class="text-center mt-1">
+                                        <small class="text-muted">Disponohen {{ item.product.stock }} {{ item.product.get_unit_display }}</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-2 text-end">
+                                    <div class="fw-bold h5 text-success">{{ item.subtotal|floatformat:0 }} ALL</div>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="addToWishlist({{ item.product.id }})">
+                                        <i class="far fa-heart me-1"></i>Ruaj
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        <!-- Farmer Delivery Info -->
+                        <div class="mt-3 p-3 bg-light rounded">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <small class="text-muted">
+                                        <i class="fas fa-truck me-1"></i>
+                                        Dorëzim nga {{ farmer.farm_name }}: 
+                                        <strong>200 ALL</strong> (Falas për porosi > 3000 ALL)
+                                    </small>
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        Koha e dorëzimit: <strong>24-48 orë</strong>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <!-- Empty Cart -->
+                    <div class="empty-cart">
+                        <img src="{% static 'images/empty-cart.svg' %}" alt="Shportë bosh" style="max-width: 200px;" class="mb-4">
+                        <h4 class="mb-3">Shporta juaj është bosh</h4>
+                        <p class="text-muted mb-4">Shtoni produkte të freskëta nga fermerët tanë për të filluar blerjen.</p>
+                        <a href="{% url 'product:list' %}" class="btn btn-success btn-lg">
+                            <i class="fas fa-shopping-basket me-2"></i>Fillo Blerjen
+                        </a>
+                    </div>
+                {% endif %}
+
+                <!-- Smart Recommendations -->
+                {% if cart_items %}
+                <div class="smart-recommendations">
+                    <h5 class="mb-3">
+                        <i class="fas fa-brain text-success me-2"></i>
+                        Rekomandime për Ju
+                    </h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="recommendation-item" onclick="addRecommendedProduct(123)">
+                                <img src="{% static 'images/lettuce.jpg' %}" class="rounded me-3" width="60" height="60" style="object-fit: cover;">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">Sallatë e Freskët</h6>
+                                    <small class="text-muted">Kombinohet mirë me domateet tuaja</small>
+                                    <div class="text-success fw-bold">180 ALL/kg</div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="recommendation-item" onclick="addRecommendedProduct(124)">
+                                <img src="{% static 'images/olive-oil.jpg' %}" class="rounded me-3" width="60" height="60" style="object-fit: cover;">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">Vaj Ulliri Extra Virgin</h6>
+                                    <small class="text-muted">Nga e njëjta fermë si specave</small>
+                                    <div class="text-success fw-bold">1200 ALL/500ml</div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Cart Summary Sidebar -->
+            {% if cart_items %}
+            <div class="col-lg-4">
+                <!-- Savings Calculator -->
+                <div class="savings-calculator">
+                    <h6 class="mb-2">
+                        <i class="fas fa-piggy-bank me-2"></i>
+                        Kursimi Juaj
+                    </h6>
+                    <div class="h4 mb-1">320 ALL</div>
+                    <small>Krahasuar me çmimet e supermarketit</small>
+                </div>
+
+                <!-- Eco Impact -->
+                <div class="eco-impact">
+                    <h6 class="mb-3">
+                        <i class="fas fa-leaf me-2"></i>
+                        Ndikimi Ekologjik
+                    </h6>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="impact-item">
+                                <span class="impact-number">2.3kg</span>
+                                <small>CO₂ e ruajtur</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="impact-item">
+                                <span class="impact-number">15km</span>
+                                <small>Distancë lokale</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delivery Options -->
+                <div class="delivery-options">
+                    <h6 class="mb-3">
+                        <i class="fas fa-truck me-2"></i>
+                        Opsionet e Dorëzimit
+                    </h6>
+                    
+                    <div class="delivery-option selected" data-price="300" data-time="24">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Dorëzim Standard</strong><br>
+                                <small class="text-muted">24-48 orë</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">300 ALL</div>
+                                <small class="text-success">Më popullor</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="delivery-option" data-price="500" data-time="12">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Dorëzim i Shpejtë</strong><br>
+                                <small class="text-muted">12-24 orë</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">500 ALL</div>
+                                <small class="text-warning">I shpejtë</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="delivery-option" data-price="0" data-time="48">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Marrje në Pikë</strong><br>
+                                <small class="text-muted">Në fermë ose qendër</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold text-success">FALAS</div>
+                                <small class="text-success">Kursim</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Promo Code -->
+                <div class="promo-section">
+                    <h6 class="mb-3">
+                        <i class="fas fa-percentage me-2"></i>
+                        Kodi Promocional
+                    </h6>
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Vendos kodin..." id="promoCode">
+                        <button class="btn btn-success" onclick="applyPromoCode()">Apliko</button>
+                    </div>
+                    <small class="text-muted mt-2 d-block">Kodi FRESH20 ju jep 20% zbritje!</small>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="smart-totals">
+                    <h5 class="mb-3 text-center">
+                        <i class="fas fa-calculator me-2"></i>
+                        Përmbledhja e Porosisë
+                    </h5>
+                    
+                    <div class="total-item">
+                        <span>Nëntotali</span>
+                        <span id="subtotal">{{ cart_subtotal|floatformat:0 }} ALL</span>
+                    </div>
+                    
+                    <div class="total-item">
+                        <span>Dorëzimi</span>
+                        <span id="deliveryFee">300 ALL</span>
+                    </div>
+                    
+                    <div class="total-item" id="discountRow" style="display: none;">
+                        <span>Zbritja <span class="badge bg-warning text-dark ms-1" id="discountCode"></span></span>
+                        <span class="text-warning" id="discountAmount">-0 ALL</span>
+                    </div>
+                    
+                    <div class="total-item">
+                        <span>TOTALI</span>
+                        <span id="grandTotal">{{ cart_total|floatformat:0 }} ALL</span>
+                    </div>
+                </div>
+
+                <!-- Checkout Button -->
+                <button class="checkout-btn" onclick="proceedToCheckout()">
+                    <i class="fas fa-credit-card me-2"></i>
+                    Vazhdo në Pagesë
+                </button>
+                
+                <!-- Security Badge -->
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-shield-alt text-success me-1"></i>
+                        Pagesat tuaja janë të sigurta dhe të mbrojtura
+                    </small>
+                </div>
+
+                <!-- Continue Shopping -->
+                <div class="text-center mt-3">
+                    <a href="{% url 'product:list' %}" class="text-decoration-none">
+                        <i class="fas fa-arrow-left me-2"></i>Vazhdo Blerjen
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Success Toast -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+    <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body" id="toastMessage">
+                Produkti u shtua në shportë!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Global variables
+let cartData = {
+    items: [],
+    subtotal: 0,
+    delivery: 300,
+    discount: 0,
+    total: 0
+};
+
+let promoCodes = {
+    'FRESH20': { discount: 0.20, type: 'percentage', description: '20% zbritje' },
+    'SAVE500': { discount: 500, type: 'fixed', description: '500 ALL zbritje' },
+    'NEWUSER': { discount: 0.15, type: 'percentage', description: '15% zbritje për përdorues të ri' }
+};
+
+// Initialize cart
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCart();
+    initializeDeliveryOptions();
+    calculateTotals();
+});
+
+function initializeCart() {
+    // Load cart from localStorage if available
+    const savedCart = localStorage.getItem('cartData');
+    if (savedCart) {
+        cartData = JSON.parse(savedCart);
+    }
+    
+    // Initialize quantity input listeners
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('change', function() {
+            const itemId = this.closest('.cart-item').dataset.itemId;
+            updateQuantity(itemId, this.value);
+        });
+    });
+}
+
+function initializeDeliveryOptions() {
+    document.querySelectorAll('.delivery-option').forEach(option => {
+        option.addEventListener('click', function() {
+            // Remove selected class from all options
+            document.querySelectorAll('.delivery-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked option
+            this.classList.add('selected');
+            
+            // Update delivery fee
+            const price = parseInt(this.dataset.price);
+            cartData.delivery = price;
+            
+            updateDeliveryFee(price);
+            calculateTotals();
+        });
+    });
+}
+
+function updateQuantity(itemId, action) {
+    const cartItem = document.querySelector(`[data-item-id="${itemId}"]`);
+    const quantityInput = cartItem.querySelector('.quantity-input');
+    const currentQuantity = parseFloat(quantityInput.value);
+    const productId = cartItem.dataset.productId;
+    
+    let newQuantity = currentQuantity;
+    
+    if (action === 'increase') {
+        newQuantity = currentQuantity + 0.5;
+    } else if (action === 'decrease') {
+        newQuantity = Math.max(0.5, currentQuantity - 0.5);
+    } else if (typeof action === 'string' && !isNaN(parseFloat(action))) {
+        newQuantity = Math.max(0.5, parseFloat(action));
+    }
+    
+    // Update input value
+    quantityInput.value = newQuantity.toFixed(1);
+    
+    // Show loading animation
+    const cartItemEl = cartItem;
+    cartItemEl.style.opacity = '0.7';
+    
+    // Simulate API call
+    setTimeout(() => {
+        // Update subtotal for this item
+        updateItemSubtotal(cartItem, newQuantity);
+        
+        // Recalculate totals
+        calculateTotals();
+        
+        // Restore opacity
+        cartItemEl.style.opacity = '1';
+        
+        // Show success message
+        showToast('Sasia u përditësua');
+        
+        // Update localStorage
+        saveCartToStorage();
+        
+    }, 500);
+}
+
+function updateItemSubtotal(cartItem, quantity) {
+    const priceElement = cartItem.querySelector('.text-success');
+    const price = parseFloat(priceElement.textContent.replace(' ALL', ''));
+    const subtotalElement = cartItem.querySelector('.h5.text-success');
+    
+    const newSubtotal = price * quantity;
+    subtotalElement.textContent = Math.round(newSubtotal) + ' ALL';
+}
+
+function removeItem(itemId) {
+    if (confirm('Jeni të sigurt që doni të hiqni këtë produkt nga shporta?')) {
+        const cartItem = document.querySelector(`[data-item-id="${itemId}"]`);
+        
+        // Add removal animation
+        cartItem.style.transform = 'translateX(-100%)';
+        cartItem.style.opacity = '0';
+        
+        setTimeout(() => {
+            cartItem.remove();
+            calculateTotals();
+            updateCartCounts();
+            showToast('Produkti u hoq nga shporta', 'info');
+            
+            // Check if cart is empty
+            if (document.querySelectorAll('.cart-item').length === 0) {
+                location.reload(); // Reload to show empty cart message
+            }
+        }, 300);
+    }
+}
+
+function calculateTotals() {
+    let subtotal = 0;
+    
+    // Calculate subtotal from all items
+    document.querySelectorAll('.cart-item').forEach(item => {
+        const subtotalText = item.querySelector('.h5.text-success').textContent;
+        const itemSubtotal = parseFloat(subtotalText.replace(' ALL', ''));
+        subtotal += itemSubtotal;
+    });
+    
+    cartData.subtotal = subtotal;
+    
+    // Calculate total
+    const total = subtotal + cartData.delivery - cartData.discount;
+    cartData.total = Math.max(0, total);
+    
+    // Update UI
+    document.getElementById('subtotal').textContent = Math.round(subtotal) + ' ALL';
+    document.getElementById('grandTotal').textContent = Math.round(cartData.total) + ' ALL';
+    
+    // Update free delivery threshold
+    const freeDeliveryThreshold = 3000;
+    if (subtotal >= freeDeliveryThreshold && cartData.delivery > 0) {
+        document.getElementById('deliveryFee').innerHTML = 
+            '<span class="text-decoration-line-through text-muted">' + cartData.delivery + ' ALL</span> <span class="text-success">FALAS</span>';
+        cartData.delivery = 0;
+    }
+}
+
+function updateDeliveryFee(fee) {
+    document.getElementById('deliveryFee').textContent = fee === 0 ? 'FALAS' : fee + ' ALL';
+}
+
+function applyPromoCode() {
+    const promoInput = document.getElementById('promoCode');
+    const code = promoInput.value.trim().toUpperCase();
+    
+    if (!code) {
+        showToast('Vendosni një kod promocional', 'warning');
+        return;
+    }
+    
+    if (promoCodes[code]) {
+        const promo = promoCodes[code];
+        
+        if (promo.type === 'percentage') {
+            cartData.discount = cartData.subtotal * promo.discount;
+        } else {
+            cartData.discount = promo.discount;
+        }
+        
+        // Update UI
+        document.getElementById('discountRow').style.display = 'flex';
+        document.getElementById('discountCode').textContent = code;
+        document.getElementById('discountAmount').textContent = '-' + Math.round(cartData.discount) + ' ALL';
+        
+        // Recalculate totals
+        calculateTotals();
+        
+        // Clear input and show success
+        promoInput.value = '';
+        showToast(`Kodi ${code} u aplikua! ${promo.description}`, 'success');
+        
+    } else {
+        showToast('Kod promocional i pavlefshëm', 'error');
+        promoInput.classList.add('is-invalid');
+        setTimeout(() => {
+            promoInput.classList.remove('is-invalid');
+        }, 3000);
+    }
+}
+
+function addRecommendedProduct(productId) {
+    // Simulate adding recommended product
+    showToast('Produkti u shtua në shportë!');
+    
+    // Update cart count
+    const currentCount = parseInt(document.getElementById('cartItemCount').textContent);
+    document.getElementById('cartItemCount').textContent = currentCount + 1;
+}
+
+function addToWishlist(productId) {
+    showToast('Produkti u shtua në lidhjet e preferuara!', 'info');
+    
+    // Change heart icon
+    const button = event.target.closest('button');
+    const icon = button.querySelector('i');
+    icon.classList.remove('far');
+    icon.classList.add('fas');
+    icon.style.color = '#dc3545';
+}
+
+function saveForLater() {
+    showToast('Shporta u ruajt për më vonë!', 'info');
+}
+
+function clearCart() {
+    if (confirm('Jeni të sigurt që doni të zbraze shportën?')) {
+        // Clear all items with animation
+        document.querySelectorAll('.cart-item').forEach((item, index) => {
+            setTimeout(() => {
+                item.style.transform = 'translateX(-100%)';
+                item.style.opacity = '0';
+                
+                setTimeout(() => {
+                    item.remove();
+                    if (index === document.querySelectorAll('.cart-item').length - 1) {
+                        location.reload();
+                    }
+                }, 300);
+            }, index * 100);
+        });
+        
+        showToast('Shporta u zbraz', 'info');
+    }
+}
+
+function proceedToCheckout() {
+    // Show loading state
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Po përgatitet...';
+    button.disabled = true;
+    
+    // Simulate preparation
+    setTimeout(() => {
+        // Redirect to checkout
+        window.location.href = '/checkout/';
+    }, 2000);
+}
+
+function updateCartCounts() {
+    const itemCount = document.querySelectorAll('.cart-item').length;
+    const farmerCount = document.querySelectorAll('.farmer-group').length;
+    
+    document.getElementById('cartItemCount').textContent = itemCount;
+    document.getElementById('farmerCount').textContent = farmerCount;
+}
+
+function saveCartToStorage() {
+    localStorage.setItem('cartData', JSON.stringify(cartData));
+}
+
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('successToast');
+    const toastMessage = document.getElementById('toastMessage');
+    
+    // Update message
+    toastMessage.textContent = message;
+    
+    // Update color based on type
+    toast.className = `toast align-items-center text-white border-0 bg-${type === 'error' ? 'danger' : type === 'warning' ? 'warning' : type === 'info' ? 'info' : 'success'}`;
+    
+    // Show toast
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+}
+
+// Auto-save cart every 30 seconds
+setInterval(() => {
+    saveCartToStorage();
+}, 30000);
+
+// Handle page unload
+window.addEventListener('beforeunload', () => {
+    saveCartToStorage();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,1018 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Produktet Bujqësore - Zbulo Cilësinë{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet">
+<style>
+:root {
+    --primary-green: #198754;
+    --light-green: rgba(25, 135, 84, 0.1);
+    --success-light: #d1e7dd;
+}
+
+.filter-card {
+    border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border-radius: 15px;
+}
+
+.product-grid-item {
+    transition: all 0.3s ease;
+    border-radius: 15px;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.product-grid-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.product-image {
+    position: relative;
+    overflow: hidden;
+    border-radius: 15px 15px 0 0;
+}
+
+.product-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(25,135,84,0.8), rgba(0,0,0,0.6));
+    opacity: 0;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-grid-item:hover .product-overlay {
+    opacity: 1;
+}
+
+.quick-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.quick-action-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.quick-action-btn:hover {
+    transform: scale(1.1);
+    background: var(--primary-green);
+    color: white;
+}
+
+.price-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: linear-gradient(135deg, var(--primary-green), #146c43);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.organic-badge, .fresh-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.organic-badge {
+    background: #ffc107;
+    color: #000;
+}
+
+.fresh-badge {
+    background: #20c997;
+    color: white;
+}
+
+.farmer-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.farmer-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 2px solid var(--primary-green);
+}
+
+.view-toggle {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 5px;
+}
+
+.view-toggle .btn {
+    border: none;
+    background: transparent;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.view-toggle .btn.active {
+    background: var(--primary-green);
+    color: white;
+}
+
+.filters-header {
+    background: linear-gradient(135deg, var(--primary-green), #146c43);
+    color: white;
+    border-radius: 15px 15px 0 0;
+    padding: 20px;
+}
+
+.smart-recommendations {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.recommendation-card {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.recommendation-card:hover {
+    border-color: var(--primary-green);
+    transform: translateY(-3px);
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    display: none;
+}
+
+.price-slider {
+    margin: 20px 0;
+}
+
+.stock-indicator {
+    width: 100%;
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.stock-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.stock-high { background: #20c997; }
+.stock-medium { background: #ffc107; }
+.stock-low { background: #dc3545; }
+
+.floating-cart {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: var(--primary-green);
+    color: white;
+    border-radius: 50px;
+    padding: 15px 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.floating-cart:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 25px rgba(0,0,0,0.4);
+}
+
+.seasonal-banner {
+    background: linear-gradient(135deg, #ff6b6b, #ffa500);
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.weather-widget {
+    background: linear-gradient(135deg, #74b9ff, #0984e3);
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Seasonal Banner -->
+<div class="seasonal-banner">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h3 class="mb-2"><i class="fas fa-calendar-alt me-2"></i>Sezoni i Vjeshtes 2024</h3>
+                <p class="mb-0">Zbuloni produktet e freskëta të sezonit - mollë, arra, rrush dhe shumë të tjera!</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <button class="btn btn-light btn-lg" onclick="filterBySeason('autumn')">
+                    <i class="fas fa-leaf me-2"></i>Shiko Produktet
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <!-- Smart Recommendations -->
+    <div class="smart-recommendations">
+        <h4 class="mb-3"><i class="fas fa-brain text-success me-2"></i>Rekomandime për Ju</h4>
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <div class="recommendation-card">
+                    <i class="fas fa-star text-warning fa-2x mb-2"></i>
+                    <h6>Më të Popullarit</h6>
+                    <p class="small text-muted">Produktet më të shitura</p>
+                    <button class="btn btn-sm btn-outline-success" onclick="loadRecommendations('popular')">Shiko</button>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="recommendation-card">
+                    <i class="fas fa-map-marker-alt text-info fa-2x mb-2"></i>
+                    <h6>Nga Zona Juaj</h6>
+                    <p class="small text-muted">Fermerë të afërt</p>
+                    <button class="btn btn-sm btn-outline-success" onclick="loadRecommendations('nearby')">Shiko</button>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="recommendation-card">
+                    <i class="fas fa-clock text-primary fa-2x mb-2"></i>
+                    <h6>Të Reja</h6>
+                    <p class="small text-muted">Shtuar sot</p>
+                    <button class="btn btn-sm btn-outline-success" onclick="loadRecommendations('new')">Shiko</button>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="recommendation-card">
+                    <i class="fas fa-percentage text-danger fa-2x mb-2"></i>
+                    <h6>Me Zbritje</h6>
+                    <p class="small text-muted">Oferta speciale</p>
+                    <button class="btn btn-sm btn-outline-success" onclick="loadRecommendations('discounted')">Shiko</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Enhanced Filters Sidebar -->
+        <div class="col-lg-3">
+            <div class="sticky-top" style="top: 1rem;">
+                <!-- Weather Widget -->
+                <div class="weather-widget">
+                    <h6><i class="fas fa-cloud-sun me-2"></i>Moti Sot</h6>
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-0">22°C</h4>
+                            <small>I kthjellët - Ideal për korrje</small>
+                        </div>
+                        <i class="fas fa-sun fa-2x"></i>
+                    </div>
+                </div>
+
+                <div class="filter-card">
+                    <div class="filters-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-filter me-2"></i>Filtro Produktet
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" id="smartFilterForm">
+                            <!-- Smart Search -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Kërko me AI</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="smartSearch" 
+                                           placeholder="p.sh. 'domate organike nga Korça'" 
+                                           value="{{ request.GET.q }}">
+                                    <button class="btn btn-outline-success" type="button" onclick="performSmartSearch()">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                                <div id="searchSuggestions" class="mt-2"></div>
+                            </div>
+
+                            <!-- Price Range Slider -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Intervali i Çmimit (ALL)</label>
+                                <div class="price-slider">
+                                    <div id="priceSlider"></div>
+                                    <div class="d-flex justify-content-between mt-2">
+                                        <span id="minPriceDisplay">0</span>
+                                        <span id="maxPriceDisplay">10000</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Category with Icons -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Kategoritë</label>
+                                <div class="category-grid">
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <button type="button" class="btn btn-outline-success w-100 category-btn" data-category="vegetables">
+                                                <i class="fas fa-carrot d-block mb-1"></i>
+                                                <small>Perime</small>
+                                            </button>
+                                        </div>
+                                        <div class="col-6">
+                                            <button type="button" class="btn btn-outline-success w-100 category-btn" data-category="fruits">
+                                                <i class="fas fa-apple-alt d-block mb-1"></i>
+                                                <small>Fruta</small>
+                                            </button>
+                                        </div>
+                                        <div class="col-6">
+                                            <button type="button" class="btn btn-outline-success w-100 category-btn" data-category="herbs">
+                                                <i class="fas fa-leaf d-block mb-1"></i>
+                                                <small>Bimë</small>
+                                            </button>
+                                        </div>
+                                        <div class="col-6">
+                                            <button type="button" class="btn btn-outline-success w-100 category-btn" data-category="grains">
+                                                <i class="fas fa-seedling d-block mb-1"></i>
+                                                <small>Drithëra</small>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quality Filters -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Cilësia</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="organic" name="organic">
+                                    <label class="form-check-label" for="organic">
+                                        <i class="fas fa-leaf text-success me-1"></i>Organike
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="local" name="local">
+                                    <label class="form-check-label" for="local">
+                                        <i class="fas fa-map-marker-alt text-info me-1"></i>Vendor
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="certified" name="certified">
+                                    <label class="form-check-label" for="certified">
+                                        <i class="fas fa-certificate text-warning me-1"></i>E Certifikuar
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Distance Filter -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Distanca (km)</label>
+                                <select class="form-select" name="distance">
+                                    <option value="">Të gjitha</option>
+                                    <option value="5">Brenda 5 km</option>
+                                    <option value="15">Brenda 15 km</option>
+                                    <option value="30">Brenda 30 km</option>
+                                    <option value="50">Brenda 50 km</option>
+                                </select>
+                            </div>
+
+                            <!-- Availability -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Disponueshmëria</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="inStock" name="in_stock" checked>
+                                    <label class="form-check-label" for="inStock">
+                                        <i class="fas fa-check-circle text-success me-1"></i>Në gjendje
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="preOrder" name="pre_order">
+                                    <label class="form-check-label" for="preOrder">
+                                        <i class="fas fa-clock text-warning me-1"></i>Para-porosi
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Harvest Date -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Korrur në</label>
+                                <select class="form-select" name="harvest_period">
+                                    <option value="">Çdo kohë</option>
+                                    <option value="today">Sot</option>
+                                    <option value="yesterday">Dje</option>
+                                    <option value="week">Këtë javë</option>
+                                    <option value="month">Këtë muaj</option>
+                                </select>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-search me-2"></i>Apliko Filtrat
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()">
+                                    <i class="fas fa-times me-2"></i>Pastro
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- Header with View Toggle and Sort -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-0">Produktet Bujqësore</h2>
+                    <p class="text-muted mb-0" id="resultsCount">Gjetur {{ products.count }} produkte</p>
+                </div>
+                
+                <div class="d-flex align-items-center gap-3">
+                    <!-- View Toggle -->
+                    <div class="view-toggle">
+                        <button class="btn active" onclick="toggleView('grid')" id="gridViewBtn">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button class="btn" onclick="toggleView('list')" id="listViewBtn">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Sort Options -->
+                    <select class="form-select" style="width: auto;" onchange="sortProducts(this.value)">
+                        <option value="newest">Më të rejat</option>
+                        <option value="price_low">Çmimi: I ulët në të lartë</option>
+                        <option value="price_high">Çmimi: I lartë në të ulët</option>
+                        <option value="rating">Vlerësimi më i lartë</option>
+                        <option value="distance">Distanca më e afërt</option>
+                        <option value="popular">Më të popullarit</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div id="productsContainer">
+                <div class="row g-4" id="productGrid">
+                    {% for product in products %}
+                    <div class="col-xl-4 col-lg-6 col-md-6 product-item" data-product-id="{{ product.id }}">
+                        <div class="card product-grid-item h-100">
+                            <div class="product-image" style="height: 250px;">
+                                {% if product.images.exists %}
+                                    <img src="{{ product.images.first.image.url }}" 
+                                         class="card-img-top h-100" 
+                                         style="object-fit: cover;" 
+                                         alt="{{ product.name }}">
+                                {% else %}
+                                    <img src="{% static 'images/product-placeholder.jpg' %}" 
+                                         class="card-img-top h-100" 
+                                         style="object-fit: cover;" 
+                                         alt="{{ product.name }}">
+                                {% endif %}
+                                
+                                <!-- Overlay with Quick Actions -->
+                                <div class="product-overlay">
+                                    <div class="quick-actions">
+                                        <button class="quick-action-btn" onclick="quickView({{ product.id }})" title="Shiko shpejt">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="quick-action-btn" onclick="addToCart({{ product.id }})" title="Shto në shportë">
+                                            <i class="fas fa-shopping-cart"></i>
+                                        </button>
+                                        <button class="quick-action-btn" onclick="toggleWishlist({{ product.id }})" title="Shto në të preferuarat">
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                        <button class="quick-action-btn" onclick="compareProduct({{ product.id }})" title="Krahaso">
+                                            <i class="fas fa-balance-scale"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Badges -->
+                                {% if product.is_organic %}
+                                    <span class="organic-badge">Organike</span>
+                                {% endif %}
+                                {% if product.harvest_date and product.harvest_date|timesince:"1 days" < "2 days" %}
+                                    <span class="fresh-badge">E Freskët</span>
+                                {% endif %}
+                                
+                                <div class="price-badge">{{ product.price }} ALL</div>
+                            </div>
+                            
+                            <div class="card-body">
+                                <!-- Farmer Info -->
+                                <div class="farmer-info">
+                                    {% if product.farmer.profile_image %}
+                                        <img src="{{ product.farmer.profile_image.url }}" class="farmer-avatar" alt="{{ product.farmer.farm_name }}">
+                                    {% else %}
+                                        <div class="farmer-avatar bg-success d-flex align-items-center justify-content-center text-white">
+                                            {{ product.farmer.farm_name|first }}
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <small class="text-muted">{{ product.farmer.farm_name }}</small><br>
+                                        <small class="text-muted">
+                                            <i class="fas fa-map-marker-alt"></i> {{ product.farmer.location.city|default:"Shqipëri" }}
+                                        </small>
+                                    </div>
+                                </div>
+                                
+                                <h5 class="card-title mb-2">
+                                    <a href="{% url 'product:detail' product.slug %}" class="text-decoration-none text-dark">
+                                        {{ product.name }}
+                                    </a>
+                                </h5>
+                                
+                                <p class="card-text text-muted small">{{ product.description|truncatewords:15 }}</p>
+                                
+                                <!-- Stock Indicator -->
+                                <div class="mb-2">
+                                    <small class="text-muted">Sasia në gjendje:</small>
+                                    <div class="stock-indicator">
+                                        <div class="stock-fill {% if product.stock > 50 %}stock-high{% elif product.stock > 20 %}stock-medium{% else %}stock-low{% endif %}" 
+                                             style="width: {{ product.stock|default:0 }}%"></div>
+                                    </div>
+                                    <small class="text-muted">{{ product.stock }} {{ product.get_unit_display }}</small>
+                                </div>
+                                
+                                <!-- Rating -->
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="text-warning me-2">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= product.average_rating|default:4 %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    <small class="text-muted">({{ product.reviews.count }} vlerësime)</small>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="text-success fw-bold">{{ product.price }} ALL</span>
+                                        <span class="text-muted">/ {{ product.get_unit_display }}</span>
+                                    </div>
+                                    <button class="btn btn-success btn-sm" onclick="addToCart({{ product.id }})">
+                                        <i class="fas fa-cart-plus me-1"></i>Shto
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <div class="text-center py-5">
+                            <img src="{% static 'images/no-products.svg' %}" alt="Nuk ka produkte" style="max-width: 300px;">
+                            <h4 class="mt-4 mb-3">Nuk u gjetën produkte</h4>
+                            <p class="text-muted mb-4">Provoni të ndryshoni filtrat ose kërkoni diçka tjetër.</p>
+                            <button class="btn btn-outline-success" onclick="clearFilters()">
+                                <i class="fas fa-times me-2"></i>Pastro Filtrat
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Load More / Pagination -->
+            {% if products.has_next %}
+            <div class="text-center mt-4">
+                <button class="btn btn-outline-success btn-lg" onclick="loadMoreProducts()">
+                    <i class="fas fa-plus me-2"></i>Ngarko më shumë produkte
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Floating Cart -->
+<div class="floating-cart" onclick="openCart()" id="floatingCart" style="display: none;">
+    <i class="fas fa-shopping-cart me-2"></i>
+    <span id="cartCount">0</span> produkte
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner-border text-success" role="status">
+        <span class="visually-hidden">Po ngarkohet...</span>
+    </div>
+</div>
+
+<!-- Quick View Modal -->
+<div class="modal fade" id="quickViewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Shiko Produktin</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="quickViewContent">
+                <!-- Quick view content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script>
+<script>
+// Global variables
+let currentPage = 1;
+let currentFilters = {};
+let cartItems = [];
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    initializePriceSlider();
+    initializeSmartSearch();
+    loadCartFromStorage();
+    updateFloatingCart();
+});
+
+// Price Slider
+function initializePriceSlider() {
+    const priceSlider = document.getElementById('priceSlider');
+    
+    noUiSlider.create(priceSlider, {
+        start: [0, 10000],
+        connect: true,
+        range: {
+            'min': 0,
+            'max': 10000
+        },
+        format: {
+            to: function (value) {
+                return Math.round(value);
+            },
+            from: function (value) {
+                return Number(value);
+            }
+        }
+    });
+    
+    priceSlider.noUiSlider.on('update', function (values, handle) {
+        document.getElementById('minPriceDisplay').textContent = values[0] + ' ALL';
+        document.getElementById('maxPriceDisplay').textContent = values[1] + ' ALL';
+    });
+    
+    priceSlider.noUiSlider.on('change', function (values, handle) {
+        updateFilters();
+    });
+}
+
+// Smart Search with Suggestions
+function initializeSmartSearch() {
+    const searchInput = document.getElementById('smartSearch');
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value;
+        
+        if (query.length > 2) {
+            searchTimeout = setTimeout(() => {
+                fetchSearchSuggestions(query);
+            }, 300);
+        } else {
+            document.getElementById('searchSuggestions').innerHTML = '';
+        }
+    });
+}
+
+function fetchSearchSuggestions(query) {
+    // Simulate API call for search suggestions
+    const suggestions = [
+        'Domate organike nga Korça',
+        'Speca të kuq të freskët',
+        'Mollë nga Mali i Zi',
+        'Qepë nga Divjaka'
+    ];
+    
+    const filtered = suggestions.filter(s => 
+        s.toLowerCase().includes(query.toLowerCase())
+    );
+    
+    displaySearchSuggestions(filtered);
+}
+
+function displaySearchSuggestions(suggestions) {
+    const container = document.getElementById('searchSuggestions');
+    
+    if (suggestions.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    const html = suggestions.map(suggestion => 
+        `<div class="suggestion-item p-2 border rounded mb-1 cursor-pointer" 
+              onclick="selectSuggestion('${suggestion}')">
+            <small>${suggestion}</small>
+         </div>`
+    ).join('');
+    
+    container.innerHTML = html;
+}
+
+function selectSuggestion(suggestion) {
+    document.getElementById('smartSearch').value = suggestion;
+    document.getElementById('searchSuggestions').innerHTML = '';
+    performSmartSearch();
+}
+
+function performSmartSearch() {
+    showLoading();
+    // Implement smart search logic
+    updateFilters();
+}
+
+// Category Filters
+document.querySelectorAll('.category-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        this.classList.toggle('active');
+        updateFilters();
+    });
+});
+
+// Update Filters
+function updateFilters() {
+    showLoading();
+    
+    // Collect all filter values
+    const formData = new FormData(document.getElementById('smartFilterForm'));
+    const params = new URLSearchParams();
+    
+    // Add price range
+    const priceRange = document.getElementById('priceSlider').noUiSlider.get();
+    params.append('min_price', priceRange[0]);
+    params.append('max_price', priceRange[1]);
+    
+    // Add form data
+    for (let [key, value] of formData.entries()) {
+        if (value) params.append(key, value);
+    }
+    
+    // Add active categories
+    const activeCategories = [];
+    document.querySelectorAll('.category-btn.active').forEach(btn => {
+        activeCategories.push(btn.dataset.category);
+    });
+    if (activeCategories.length > 0) {
+        params.append('categories', activeCategories.join(','));
+    }
+    
+    // Fetch filtered results
+    fetch(`/produktet/filter/?${params.toString()}`)
+        .then(response => response.json())
+        .then(data => {
+            updateProductGrid(data.products);
+            updateResultsCount(data.count);
+            hideLoading();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            hideLoading();
+        });
+}
+
+// Toggle View
+function toggleView(viewType) {
+    const gridBtn = document.getElementById('gridViewBtn');
+    const listBtn = document.getElementById('listViewBtn');
+    const productGrid = document.getElementById('productGrid');
+    
+    if (viewType === 'grid') {
+        gridBtn.classList.add('active');
+        listBtn.classList.remove('active');
+        productGrid.className = 'row g-4';
+        
+        document.querySelectorAll('.product-item').forEach(item => {
+            item.className = 'col-xl-4 col-lg-6 col-md-6 product-item';
+        });
+    } else {
+        listBtn.classList.add('active');
+        gridBtn.classList.remove('active');
+        productGrid.className = 'row g-3';
+        
+        document.querySelectorAll('.product-item').forEach(item => {
+            item.className = 'col-12 product-item';
+            // Add list view specific styling
+        });
+    }
+}
+
+// Quick Actions
+function quickView(productId) {
+    fetch(`/produktet/${productId}/quick-view/`)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('quickViewContent').innerHTML = html;
+            new bootstrap.Modal(document.getElementById('quickViewModal')).show();
+        });
+}
+
+function addToCart(productId) {
+    // Add animation effect
+    const btn = event.target.closest('button');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    
+    setTimeout(() => {
+        cartItems.push(productId);
+        saveCartToStorage();
+        updateFloatingCart();
+        
+        btn.innerHTML = '<i class="fas fa-check text-success"></i>';
+        setTimeout(() => {
+            btn.innerHTML = '<i class="fas fa-cart-plus me-1"></i>Shto';
+        }, 1500);
+        
+        // Show success message
+        showToast('Produkti u shtua në shportë!', 'success');
+    }, 500);
+}
+
+function toggleWishlist(productId) {
+    const btn = event.target.closest('button');
+    const icon = btn.querySelector('i');
+    
+    if (icon.classList.contains('far')) {
+        icon.classList.remove('far');
+        icon.classList.add('fas');
+        btn.style.color = '#dc3545';
+        showToast('Produkti u shtua në të preferuarat!', 'success');
+    } else {
+        icon.classList.remove('fas');
+        icon.classList.add('far');
+        btn.style.color = '';
+        showToast('Produkti u hoq nga të preferuarat!', 'info');
+    }
+}
+
+function compareProduct(productId) {
+    // Add to comparison list
+    showToast('Produkti u shtua për krahasim!', 'info');
+}
+
+// Recommendations
+function loadRecommendations(type) {
+    showLoading();
+    
+    fetch(`/produktet/recommendations/${type}/`)
+        .then(response => response.json())
+        .then(data => {
+            updateProductGrid(data.products);
+            updateResultsCount(data.count);
+            hideLoading();
+        });
+}
+
+function filterBySeason(season) {
+    showLoading();
+    
+    fetch(`/produktet/seasonal/${season}/`)
+        .then(response => response.json())
+        .then(data => {
+            updateProductGrid(data.products);
+            updateResultsCount(data.count);
+            hideLoading();
+        });
+}
+
+// Sort Products
+function sortProducts(sortBy) {
+    showLoading();
+    
+    const params = new URLSearchParams(window.location.search);
+    params.set('sort', sortBy);
+    
+    fetch(`/produktet/?${params.toString()}`)
+        .then(response => response.json())
+        .then(data => {
+            updateProductGrid(data.products);
+            hideLoading();
+        });
+}
+
+// Helper Functions
+function updateProductGrid(products) {
+    const grid = document.getElementById('productGrid');
+    // Update grid with new products
+    // Implementation depends on your backend response format
+}
+
+function updateResultsCount(count) {
+    document.getElementById('resultsCount').textContent = `Gjetur ${count} produkte`;
+}
+
+function showLoading() {
+    document.getElementById('loadingOverlay').style.display = 'flex';
+}
+
+function hideLoading() {
+    document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+function clearFilters() {
+    document.getElementById('smartFilterForm').reset();
+    document.getElementById('priceSlider').noUiSlider.set([0, 10000]);
+    document.querySelectorAll('.category-btn.active').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    updateFilters();
+}
+
+function updateFloatingCart() {
+    const cart = document.getElementById('floatingCart');
+    const count = document.getElementById('cartCount');
+    
+    if (cartItems.length > 0) {
+        cart.style.display = 'block';
+        count.textContent = cartItems.length;
+    } else {
+        cart.style.display = 'none';
+    }
+}
+
+function openCart() {
+    window.location.href = '/shporta/';
+}
+
+function saveCartToStorage() {
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+}
+
+function loadCartFromStorage() {
+    const stored = localStorage.getItem('cartItems');
+    if (stored) {
+        cartItems = JSON.parse(stored);
+    }
+}
+
+function showToast(message, type = 'success') {
+    // Create and show toast notification
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999;';
+    toast.textContent = message;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,935 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Inteligjent - {{ farmer.farm_name }}{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/chart.js@4.0.0/dist/chart.min.css" rel="stylesheet">
+<style>
+.dashboard-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.metric-card {
+    background: linear-gradient(135deg, #198754, #146c43);
+    color: white;
+    border-radius: 15px;
+    padding: 25px;
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    transform: rotate(45deg);
+}
+
+.metric-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.metric-change {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.metric-change.positive {
+    color: #20c997;
+}
+
+.metric-change.negative {
+    color: #fd7e14;
+}
+
+.weather-widget {
+    background: linear-gradient(135deg, #74b9ff, #0984e3);
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.recommendation-card {
+    background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.task-item {
+    padding: 15px;
+    border-left: 4px solid #198754;
+    background: #f8f9fa;
+    border-radius: 0 10px 10px 0;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.task-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.task-priority-high {
+    border-left-color: #dc3545;
+}
+
+.task-priority-medium {
+    border-left-color: #ffc107;
+}
+
+.task-priority-low {
+    border-left-color: #198754;
+}
+
+.activity-timeline {
+    position: relative;
+}
+
+.activity-timeline::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e9ecef;
+}
+
+.activity-item {
+    position: relative;
+    padding-left: 60px;
+    margin-bottom: 20px;
+}
+
+.activity-icon {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 40px;
+    height: 40px;
+    background: #198754;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.progress-ring {
+    width: 120px;
+    height: 120px;
+}
+
+.progress-ring-circle {
+    stroke: #198754;
+    stroke-width: 8;
+    stroke-linecap: round;
+    fill: transparent;
+    r: 52;
+    cx: 60;
+    cy: 60;
+    stroke-dasharray: 326.73;
+    stroke-dashoffset: 326.73;
+    transition: stroke-dashoffset 0.5s ease-in-out;
+}
+
+.alerts-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    width: 300px;
+}
+
+.smart-alert {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.quick-action-btn {
+    background: linear-gradient(135deg, #198754, #146c43);
+    border: none;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.quick-action-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.quick-action-btn:hover::before {
+    left: 100%;
+}
+
+.quick-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(25,135,84,0.3);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header with Smart Greeting -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-2">
+                <i class="fas fa-seedling text-success me-2"></i>
+                <span id="smartGreeting">Mirëmëngjes</span>, {{ farmer.user.first_name|default:farmer.user.username }}!
+            </h1>
+            <p class="lead text-muted">{{ farmer.farm_name }} - <span id="currentDate"></span></p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <div class="weather-widget">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="mb-0">Moti Sot</h6>
+                        <h4 class="mb-0" id="temperature">22°C</h4>
+                        <small id="weatherDesc">I kthjellët</small>
+                    </div>
+                    <i class="fas fa-sun fa-2x" id="weatherIcon"></i>
+                </div>
+                <div class="mt-2">
+                    <small><i class="fas fa-eye me-1"></i>Dukshmëria: <span id="visibility">10km</span></small><br>
+                    <small><i class="fas fa-tint me-1"></i>Lagështira: <span id="humidity">65%</span></small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Smart Recommendations -->
+    <div class="recommendation-card">
+        <div class="d-flex align-items-center mb-3">
+            <i class="fas fa-brain fa-2x text-warning me-3"></i>
+            <div>
+                <h5 class="mb-0">Rekomandimi i Ditës</h5>
+                <small class="text-muted">Bazuar në të dhënat tuaja dhe kushtet aktuale</small>
+            </div>
+        </div>
+        <div id="dailyRecommendation">
+            <p class="mb-2"><strong>Kohë ideale për ujitje:</strong> Ora 06:00-08:00 dhe 18:00-20:00</p>
+            <p class="mb-0"><strong>Aktivitet i rekomanduar:</strong> Kontrolloni domatet për shenja të sëmundjeve - kushtet e lagura favorizojnë zhvillimin e kërpudhave.</p>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="metric-number" id="totalRevenue">12,450</div>
+                        <h6 class="mb-1">Të Ardhura (ALL)</h6>
+                        <small class="metric-change positive">
+                            <i class="fas fa-arrow-up me-1"></i>+12.5% nga muaji i kaluar
+                        </small>
+                    </div>
+                    <i class="fas fa-coins fa-3x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card" style="background: linear-gradient(135deg, #6c5ce7, #5f39a0);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="metric-number" id="totalOrders">156</div>
+                        <h6 class="mb-1">Porosi Aktive</h6>
+                        <small class="metric-change positive">
+                            <i class="fas fa-arrow-up me-1"></i>+8 sot
+                        </small>
+                    </div>
+                    <i class="fas fa-shopping-basket fa-3x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card" style="background: linear-gradient(135deg, #00b894, #00a085);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="metric-number" id="totalProducts">{{ farmer.products.count }}</div>
+                        <h6 class="mb-1">Produkte Aktive</h6>
+                        <small class="metric-change positive">
+                            <i class="fas fa-arrow-up me-1"></i>+3 këtë javë
+                        </small>
+                    </div>
+                    <i class="fas fa-apple-alt fa-3x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card" style="background: linear-gradient(135deg, #fd79a8, #e84393);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="metric-number">4.8</div>
+                        <h6 class="mb-1">Vlerësim Mesatar</h6>
+                        <small class="metric-change positive">
+                            <i class="fas fa-arrow-up me-1"></i>+0.2 nga muaji i kaluar
+                        </small>
+                    </div>
+                    <i class="fas fa-star fa-3x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Sales Analytics -->
+        <div class="col-xl-8">
+            <div class="dashboard-card">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line text-success me-2"></i>Analiza e Shitjeve
+                    </h5>
+                    <div class="btn-group" role="group">
+                        <input type="radio" class="btn-check" name="timeRange" id="week" checked>
+                        <label class="btn btn-outline-success btn-sm" for="week">7 ditë</label>
+                        
+                        <input type="radio" class="btn-check" name="timeRange" id="month">
+                        <label class="btn btn-outline-success btn-sm" for="month">30 ditë</label>
+                        
+                        <input type="radio" class="btn-check" name="timeRange" id="year">
+                        <label class="btn btn-outline-success btn-sm" for="year">1 vit</label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="salesChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Management -->
+        <div class="col-xl-4">
+            <div class="dashboard-card h-100">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tasks text-success me-2"></i>Detyrat e Ditës
+                    </h5>
+                    <button class="btn btn-sm btn-outline-success" onclick="addNewTask()">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    <div id="tasksContainer">
+                        <div class="task-item task-priority-high">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <h6 class="mb-1">Ujitja e domateve</h6>
+                                    <small class="text-muted">Ora 07:00 - Sektori A</small>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="task1">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="task-item task-priority-medium">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <h6 class="mb-1">Kontrolli i bimëve</h6>
+                                    <small class="text-muted">Ora 10:00 - Të gjitha sektorët</small>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="task2">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="task-item task-priority-low">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <h6 class="mb-1">Përgatitja për korrje</h6>
+                                    <small class="text-muted">Ora 15:00 - Speca</small>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="task3">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Ring -->
+                    <div class="text-center mt-4">
+                        <svg class="progress-ring">
+                            <circle class="progress-ring-circle" id="progressCircle"></circle>
+                            <text x="60" y="65" text-anchor="middle" class="progress-text">
+                                <tspan id="progressPercent">65%</tspan>
+                            </text>
+                        </svg>
+                        <p class="text-muted mt-2">Përfundim i detyrave</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Sections -->
+    <div class="row g-4 mt-1">
+        <!-- Product Performance -->
+        <div class="col-lg-6">
+            <div class="dashboard-card">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-trophy text-warning me-2"></i>Produktet më të Suksesshme
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-borderless">
+                            <thead>
+                                <tr class="text-muted">
+                                    <th>Produkti</th>
+                                    <th>Shitur</th>
+                                    <th>Të ardhura</th>
+                                    <th>Trend</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="{% static 'images/tomato.jpg' %}" class="rounded me-2" width="40" height="40" style="object-fit: cover;">
+                                            <div>
+                                                <h6 class="mb-0">Domate Cherry</h6>
+                                                <small class="text-muted">Bio</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>145 kg</td>
+                                    <td>4,350 ALL</td>
+                                    <td><i class="fas fa-arrow-up text-success"></i></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="{% static 'images/pepper.jpg' %}" class="rounded me-2" width="40" height="40" style="object-fit: cover;">
+                                            <div>
+                                                <h6 class="mb-0">Speca të Kuq</h6>
+                                                <small class="text-muted">Tradicional</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>89 kg</td>
+                                    <td>2,670 ALL</td>
+                                    <td><i class="fas fa-arrow-up text-success"></i></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="{% static 'images/cucumber.jpg' %}" class="rounded me-2" width="40" height="40" style="object-fit: cover;">
+                                            <div>
+                                                <h6 class="mb-0">Kastravec</h6>
+                                                <small class="text-muted">Bio</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>67 kg</td>
+                                    <td>1,340 ALL</td>
+                                    <td><i class="fas fa-arrow-down text-danger"></i></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="col-lg-6">
+            <div class="dashboard-card">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history text-info me-2"></i>Aktiviteti i Fundit
+                    </h5>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    <div class="activity-timeline">
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Porosi e re nga Ana Dema</h6>
+                                <p class="text-muted mb-1 small">5 kg domate cherry, 2 kg speca</p>
+                                <small class="text-muted">2 minuta më parë</small>
+                            </div>
+                        </div>
+                        
+                        <div class="activity-item">
+                            <div class="activity-icon bg-warning">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Vlerësim i ri: 5 yje</h6>
+                                <p class="text-muted mb-1 small">"Produkte të shkëlqyera, cilësi e lartë!"</p>
+                                <small class="text-muted">15 minuta më parë</small>
+                            </div>
+                        </div>
+                        
+                        <div class="activity-item">
+                            <div class="activity-icon bg-info">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Produkt i ri i shtuar</h6>
+                                <p class="text-muted mb-1 small">Piper i zi tradicional</p>
+                                <small class="text-muted">1 orë më parë</small>
+                            </div>
+                        </div>
+                        
+                        <div class="activity-item">
+                            <div class="activity-icon bg-success">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Porosi e dorëzuar</h6>
+                                <p class="text-muted mb-1 small">Porosi #12845 - Marko Gjoni</p>
+                                <small class="text-muted">3 orë më parë</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="dashboard-card">
+                <div class="card-body">
+                    <h5 class="mb-3">
+                        <i class="fas fa-bolt text-warning me-2"></i>Veprime të Shpejta
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-lg-2 col-md-4 col-6">
+                            <button class="quick-action-btn w-100" onclick="addNewProduct()">
+                                <i class="fas fa-plus-circle d-block mb-2"></i>
+                                <small>Shto Produkt</small>
+                            </button>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-6">
+                            <button class="quick-action-btn w-100" onclick="viewOrders()">
+                                <i class="fas fa-list-alt d-block mb-2"></i>
+                                <small>Porositë</small>
+                            </button>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-6">
+                            <button class="quick-action-btn w-100" onclick="updateInventory()">
+                                <i class="fas fa-boxes d-block mb-2"></i>
+                                <small>Inventari</small>
+                            </button>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-6">
+                            <button class="quick-action-btn w-100" onclick="viewAnalytics()">
+                                <i class="fas fa-chart-bar d-block mb-2"></i>
+                                <small>Analiza</small>
+                            </button>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-6">
+                            <button class="quick-action-btn w-100" onclick="manageProfile()">
+                                <i class="fas fa-user-edit d-block mb-2"></i>
+                                <small>Profili</small>
+                            </button>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-6">
+                            <button class="quick-action-btn w-100" onclick="getSupport()">
+                                <i class="fas fa-headset d-block mb-2"></i>
+                                <small>Mbështetje</small>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Smart Alerts Container -->
+<div class="alerts-container" id="alertsContainer">
+    <!-- Dynamic alerts will appear here -->
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.0.0/dist/chart.min.js"></script>
+<script>
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    initializeGreeting();
+    initializeDate();
+    initializeSalesChart();
+    initializeProgressRing();
+    fetchWeatherData();
+    initializeRealTimeUpdates();
+    showDailyRecommendations();
+});
+
+// Smart greeting based on time
+function initializeGreeting() {
+    const hour = new Date().getHours();
+    let greeting;
+    
+    if (hour < 12) {
+        greeting = 'Mirëmëngjes';
+    } else if (hour < 18) {
+        greeting = 'Mirëdita';
+    } else {
+        greeting = 'Mirëmbrëma';
+    }
+    
+    document.getElementById('smartGreeting').textContent = greeting;
+}
+
+// Set current date
+function initializeDate() {
+    const date = new Date();
+    const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    };
+    document.getElementById('currentDate').textContent = 
+        date.toLocaleDateString('sq-AL', options);
+}
+
+// Sales Chart
+function initializeSalesChart() {
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Hënë', 'Martë', 'Mërkurë', 'Enjte', 'Premte', 'Shtunë', 'Diel'],
+            datasets: [{
+                label: 'Shitjet (ALL)',
+                data: [1200, 1900, 800, 1500, 2000, 1800, 2200],
+                borderColor: '#198754',
+                backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }, {
+                label: 'Porositë',
+                data: [12, 19, 8, 15, 20, 18, 22],
+                borderColor: '#6c5ce7',
+                backgroundColor: 'rgba(108, 92, 231, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                yAxisID: 'y1'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Shitjet (ALL)'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Numri i Porosive'
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                }
+            }
+        }
+    });
+}
+
+// Progress Ring Animation
+function initializeProgressRing() {
+    const circle = document.getElementById('progressCircle');
+    const percent = document.getElementById('progressPercent');
+    
+    const circumference = 2 * Math.PI * 52;
+    circle.style.strokeDasharray = circumference;
+    
+    function setProgress(percentage) {
+        const offset = circumference - (percentage / 100) * circumference;
+        circle.style.strokeDashoffset = offset;
+        percent.textContent = Math.round(percentage) + '%';
+    }
+    
+    // Animate to 65%
+    let currentPercent = 0;
+    const targetPercent = 65;
+    const increment = targetPercent / 50;
+    
+    const animation = setInterval(() => {
+        currentPercent += increment;
+        if (currentPercent >= targetPercent) {
+            currentPercent = targetPercent;
+            clearInterval(animation);
+        }
+        setProgress(currentPercent);
+    }, 50);
+}
+
+// Fetch Weather Data
+function fetchWeatherData() {
+    // Simulate weather API call
+    setTimeout(() => {
+        const weatherData = {
+            temperature: 22,
+            description: 'I kthjellët',
+            icon: 'fa-sun',
+            visibility: '10km',
+            humidity: '65%'
+        };
+        
+        document.getElementById('temperature').textContent = weatherData.temperature + '°C';
+        document.getElementById('weatherDesc').textContent = weatherData.description;
+        document.getElementById('weatherIcon').className = `fas ${weatherData.icon} fa-2x`;
+        document.getElementById('visibility').textContent = weatherData.visibility;
+        document.getElementById('humidity').textContent = weatherData.humidity;
+    }, 1000);
+}
+
+// Real-time Updates
+function initializeRealTimeUpdates() {
+    // Simulate real-time data updates
+    setInterval(() => {
+        updateMetrics();
+    }, 30000); // Update every 30 seconds
+    
+    // Check for new notifications
+    setInterval(() => {
+        checkForNotifications();
+    }, 60000); // Check every minute
+}
+
+function updateMetrics() {
+    // Simulate metric updates
+    const revenue = document.getElementById('totalRevenue');
+    const orders = document.getElementById('totalOrders');
+    
+    // Add small random changes
+    const currentRevenue = parseInt(revenue.textContent.replace(',', ''));
+    const newRevenue = currentRevenue + Math.floor(Math.random() * 200);
+    revenue.textContent = newRevenue.toLocaleString();
+    
+    const currentOrders = parseInt(orders.textContent);
+    if (Math.random() > 0.8) { // 20% chance of new order
+        orders.textContent = currentOrders + 1;
+        showAlert('Porosi e re!', 'Ju keni marrë një porosi të re.', 'success');
+    }
+}
+
+function checkForNotifications() {
+    // Simulate checking for notifications
+    if (Math.random() > 0.9) { // 10% chance
+        const notifications = [
+            {
+                title: 'Produkt në fund',
+                message: 'Domateve cherry ju kanë mbetur vetëm 5kg',
+                type: 'warning'
+            },
+            {
+                title: 'Vlerësim i ri',
+                message: 'Keni marrë një vlerësim 5 yje!',
+                type: 'success'
+            },
+            {
+                title: 'Paralajmërim moti',
+                message: 'Parashikohet shi për nesër',
+                type: 'info'
+            }
+        ];
+        
+        const notification = notifications[Math.floor(Math.random() * notifications.length)];
+        showAlert(notification.title, notification.message, notification.type);
+    }
+}
+
+// Show Smart Alert
+function showAlert(title, message, type = 'info') {
+    const alertsContainer = document.getElementById('alertsContainer');
+    
+    const alert = document.createElement('div');
+    alert.className = `smart-alert border-start border-${type} border-4`;
+    alert.innerHTML = `
+        <div class="d-flex align-items-start">
+            <div class="flex-grow-1">
+                <h6 class="mb-1">${title}</h6>
+                <p class="mb-0 small text-muted">${message}</p>
+            </div>
+            <button class="btn-close btn-sm" onclick="this.parentElement.parentElement.remove()"></button>
+        </div>
+    `;
+    
+    alertsContainer.appendChild(alert);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (alert.parentElement) {
+            alert.remove();
+        }
+    }, 5000);
+}
+
+// Daily Recommendations
+function showDailyRecommendations() {
+    // Simulate AI-powered recommendations
+    const recommendations = [
+        {
+            title: 'Kohë ideale për ujitje',
+            content: 'Ora 06:00-08:00 dhe 18:00-20:00',
+            reason: 'Temperaturat e ulëta reducojnë avullimin'
+        },
+        {
+            title: 'Aktivitet i rekomanduar',
+            content: 'Kontrolloni domateet për shenja të sëmundjeve',
+            reason: 'Kushtet e lagura favorizojnë zhvillimin e kërpudhave'
+        },
+        {
+            title: 'Çmimi i rekomanduar',
+            content: 'Rrisni çmimin e domaterve me 10%',
+            reason: 'Kërkesa është e lartë dhe oferta e kufizuar'
+        }
+    ];
+    
+    // Display random recommendation
+    const recommendation = recommendations[Math.floor(Math.random() * recommendations.length)];
+    document.getElementById('dailyRecommendation').innerHTML = `
+        <p class="mb-2"><strong>${recommendation.title}:</strong> ${recommendation.content}</p>
+        <p class="mb-0"><small class="text-muted">Arsyeja: ${recommendation.reason}</small></p>
+    `;
+}
+
+// Quick Actions
+function addNewProduct() {
+    window.location.href = '/farmer/product/add/';
+}
+
+function viewOrders() {
+    window.location.href = '/farmer/orders/';
+}
+
+function updateInventory() {
+    window.location.href = '/farmer/inventory/';
+}
+
+function viewAnalytics() {
+    window.location.href = '/farmer/analytics/';
+}
+
+function manageProfile() {
+    window.location.href = '/farmer/profile/';
+}
+
+function getSupport() {
+    window.location.href = '/support/';
+}
+
+function addNewTask() {
+    const taskText = prompt('Shto detyë të re:');
+    if (taskText) {
+        const taskContainer = document.getElementById('tasksContainer');
+        const newTask = document.createElement('div');
+        newTask.className = 'task-item task-priority-medium';
+        newTask.innerHTML = `
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="mb-1">${taskText}</h6>
+                    <small class="text-muted">Shtuar tani</small>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox">
+                </div>
+            </div>
+        `;
+        taskContainer.appendChild(newTask);
+    }
+}
+
+// Task completion tracking
+document.addEventListener('change', function(e) {
+    if (e.target.type === 'checkbox' && e.target.closest('.task-item')) {
+        updateTaskProgress();
+    }
+});
+
+function updateTaskProgress() {
+    const totalTasks = document.querySelectorAll('.task-item input[type="checkbox"]').length;
+    const completedTasks = document.querySelectorAll('.task-item input[type="checkbox"]:checked').length;
+    const percentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+    
+    // Update progress ring
+    const circle = document.getElementById('progressCircle');
+    const percent = document.getElementById('progressPercent');
+    const circumference = 2 * Math.PI * 52;
+    const offset = circumference - (percentage / 100) * circumference;
+    
+    circle.style.strokeDashoffset = offset;
+    percent.textContent = Math.round(percentage) + '%';
+}
+</script>
+{% endblock %}

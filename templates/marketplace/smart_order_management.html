@@ -1,0 +1,1116 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Menaxhimi i Porosive - Inteligjent{% endblock %}
+
+{% block extra_css %}
+<style>
+.order-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.order-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.order-status {
+    position: relative;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-pending { background: #fff3cd; color: #856404; }
+.status-confirmed { background: #d1ecf1; color: #0c5460; }
+.status-processing { background: #d4edda; color: #155724; }
+.status-shipping { background: #cce5ff; color: #004085; }
+.status-delivered { background: #d1e7dd; color: #0f5132; }
+.status-cancelled { background: #f8d7da; color: #721c24; }
+
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e9ecef;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -25px;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 3px solid #198754;
+    background: white;
+}
+
+.timeline-marker.completed {
+    background: #198754;
+}
+
+.timeline-marker.current {
+    background: #ffc107;
+    border-color: #ffc107;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+}
+
+.order-filters {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.filter-chip {
+    display: inline-block;
+    padding: 8px 16px;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 20px;
+    margin: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-chip:hover, .filter-chip.active {
+    background: #198754;
+    color: white;
+    border-color: #198754;
+}
+
+.order-summary {
+    background: linear-gradient(135deg, #198754, #146c43);
+    color: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 30px;
+}
+
+.summary-item {
+    text-align: center;
+    padding: 20px;
+}
+
+.summary-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.communication-panel {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.message-bubble {
+    background: white;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.message-bubble.sent {
+    background: #198754;
+    color: white;
+    margin-left: 20%;
+}
+
+.message-bubble.received {
+    background: white;
+    margin-right: 20%;
+}
+
+.quick-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.quick-action-btn {
+    background: linear-gradient(135deg, #198754, #146c43);
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.quick-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(25,135,84,0.3);
+}
+
+.action-processing {
+    background: #6c757d !important;
+    cursor: not-allowed;
+}
+
+.order-items-preview {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.item-preview {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.item-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.real-time-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #20c997;
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.3; }
+}
+
+.notification-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 10px;
+    padding: 15px 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border-left: 4px solid #198754;
+    z-index: 1000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+}
+
+.notification-toast.show {
+    transform: translateX(0);
+}
+
+.smart-insights {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.insight-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.insight-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header with Real-time Indicator -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-2">
+                <i class="fas fa-shopping-basket text-success me-2"></i>
+                Menaxhimi i Porosive
+                <span class="real-time-indicator"></span>
+                <small class="text-muted">Live</small>
+            </h1>
+            <p class="text-muted mb-0">Monitoroni dhe menaxhoni porositë në kohë reale</p>
+        </div>
+        <div>
+            <button class="btn btn-outline-success me-2" onclick="exportOrders()">
+                <i class="fas fa-download me-2"></i>Eksporto
+            </button>
+            <button class="btn btn-success" onclick="bulkActions()">
+                <i class="fas fa-tasks me-2"></i>Veprime Masive
+            </button>
+        </div>
+    </div>
+
+    <!-- Smart Insights -->
+    <div class="smart-insights">
+        <h5 class="mb-3"><i class="fas fa-brain me-2"></i>Njohuri Inteligjente</h5>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="insight-item">
+                    <div class="insight-icon">
+                        <i class="fas fa-trend-up"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0">Rritje 15%</h6>
+                        <small>Porositë këtë muaj vs muajin e kaluar</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="insight-item">
+                    <div class="insight-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0">2.3 orë</h6>
+                        <small>Koha mesatare e përpunimit</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="insight-item">
+                    <div class="insight-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0">4.8/5</h6>
+                        <small>Vlerësimi mesatar i shërbimit</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Summary Dashboard -->
+    <div class="order-summary">
+        <div class="row">
+            <div class="col-md-2">
+                <div class="summary-item">
+                    <div class="summary-number" id="totalOrders">{{ total_orders }}</div>
+                    <div>Total Porosi</div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="summary-item">
+                    <div class="summary-number text-warning" id="pendingOrders">{{ pending_orders }}</div>
+                    <div>Në Pritje</div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="summary-item">
+                    <div class="summary-number text-info" id="processingOrders">{{ processing_orders }}</div>
+                    <div>Në Përpunim</div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="summary-item">
+                    <div class="summary-number text-primary" id="shippingOrders">{{ shipping_orders }}</div>
+                    <div>Në Transport</div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="summary-item">
+                    <div class="summary-number text-success" id="deliveredOrders">{{ delivered_orders }}</div>
+                    <div>Dorëzuar</div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="summary-item">
+                    <div class="summary-number">{{ total_revenue }} ALL</div>
+                    <div>Të Ardhura</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Smart Filters -->
+    <div class="order-filters">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h6 class="mb-0"><i class="fas fa-filter me-2"></i>Filtro Porositë</h6>
+            <button class="btn btn-sm btn-outline-secondary" onclick="clearFilters()">
+                <i class="fas fa-times me-1"></i>Pastro
+            </button>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="filter-chips">
+                    <span class="filter-chip active" data-status="all">Të Gjitha</span>
+                    <span class="filter-chip" data-status="pending">Në Pritje</span>
+                    <span class="filter-chip" data-status="confirmed">Konfirmuar</span>
+                    <span class="filter-chip" data-status="processing">Në Përpunim</span>
+                    <span class="filter-chip" data-status="shipping">Në Transport</span>
+                    <span class="filter-chip" data-status="delivered">Dorëzuar</span>
+                    <span class="filter-chip" data-status="urgent">Urgjente</span>
+                    <span class="filter-chip" data-status="high-value">Vlerë të Lartë</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Kërko porosi..." id="orderSearch">
+                    <button class="btn btn-outline-secondary" type="button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders List -->
+    <div class="row" id="ordersContainer">
+        {% for order in orders %}
+        <div class="col-lg-6 col-xl-4 order-item" data-status="{{ order.status }}" data-order-id="{{ order.id }}">
+            <div class="order-card">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0">#{{ order.order_number }}</h6>
+                        <small class="text-muted">{{ order.created_at|date:"d M Y, H:i" }}</small>
+                    </div>
+                    <span class="order-status status-{{ order.status }}">{{ order.get_status_display }}</span>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Customer Info -->
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="customer-avatar me-3">
+                            {% if order.user.profile_image %}
+                                <img src="{{ order.user.profile_image.url }}" class="rounded-circle" width="40" height="40">
+                            {% else %}
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">
+                                    {{ order.user.first_name|first|default:order.user.username|first }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h6 class="mb-0">{{ order.user.get_full_name|default:order.user.username }}</h6>
+                            <small class="text-muted">
+                                <i class="fas fa-map-marker-alt me-1"></i>{{ order.shipping_city }}
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Order Items Preview -->
+                    <div class="order-items-preview">
+                        {% for item in order.items.all|slice:":4" %}
+                            <div class="item-preview">
+                                {% if item.product.images.exists %}
+                                    <img src="{{ item.product.images.first.image.url }}" 
+                                         class="w-100 h-100" style="object-fit: cover;" 
+                                         alt="{{ item.product_name }}">
+                                {% else %}
+                                    <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-image text-muted"></i>
+                                    </div>
+                                {% endif %}
+                                <span class="item-count">{{ item.quantity|floatformat:0 }}</span>
+                            </div>
+                        {% endfor %}
+                        {% if order.items.count > 4 %}
+                            <div class="item-preview bg-light d-flex align-items-center justify-content-center">
+                                <small>+{{ order.items.count|add:"-4" }}</small>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <strong>{{ order.total_amount }} ALL</strong><br>
+                            <small class="text-muted">{{ order.items.count }} produkte</small>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted">{{ order.get_payment_method_display }}</small><br>
+                            <small class="text-success">
+                                <i class="fas fa-check-circle me-1"></i>E paguar
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Progress -->
+                    <div class="timeline mb-3">
+                        <div class="timeline-item">
+                            <div class="timeline-marker completed"></div>
+                            <div>
+                                <h6 class="mb-0">Porosi e marrë</h6>
+                                <small class="text-muted">{{ order.created_at|date:"H:i" }}</small>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker {% if order.status != 'pending' %}completed{% else %}current{% endif %}"></div>
+                            <div>
+                                <h6 class="mb-0">Konfirmuar</h6>
+                                <small class="text-muted">
+                                    {% if order.status != 'pending' %}{{ order.updated_at|date:"H:i" }}{% else %}Në pritje{% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker {% if order.status == 'processing' or order.status == 'shipping' or order.status == 'delivered' %}completed{% elif order.status == 'confirmed' %}current{% endif %}"></div>
+                            <div>
+                                <h6 class="mb-0">Në përgatitje</h6>
+                                <small class="text-muted">Përllogaritur: ~2 orë</small>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker {% if order.status == 'delivered' %}completed{% elif order.status == 'shipping' %}current{% endif %}"></div>
+                            <div>
+                                <h6 class="mb-0">Dorëzuar</h6>
+                                <small class="text-muted">Përllogaritur: nesër</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        {% if order.status == 'pending' %}
+                            <button class="quick-action-btn" onclick="confirmOrder({{ order.id }})">
+                                <i class="fas fa-check me-1"></i>Konfirmo
+                            </button>
+                            <button class="quick-action-btn" style="background: #dc3545;" onclick="cancelOrder({{ order.id }})">
+                                <i class="fas fa-times me-1"></i>Anulo
+                            </button>
+                        {% elif order.status == 'confirmed' %}
+                            <button class="quick-action-btn" onclick="startProcessing({{ order.id }})">
+                                <i class="fas fa-play me-1"></i>Fillo Përpunimin
+                            </button>
+                        {% elif order.status == 'processing' %}
+                            <button class="quick-action-btn" onclick="markAsShipping({{ order.id }})">
+                                <i class="fas fa-truck me-1"></i>Dërgo
+                            </button>
+                        {% elif order.status == 'shipping' %}
+                            <button class="quick-action-btn" onclick="markAsDelivered({{ order.id }})">
+                                <i class="fas fa-box-open me-1"></i>Dorëzuar
+                            </button>
+                        {% endif %}
+                        
+                        <button class="quick-action-btn" style="background: #6c5ce7;" onclick="contactCustomer({{ order.id }})">
+                            <i class="fas fa-comment me-1"></i>Mesazh
+                        </button>
+                        <button class="quick-action-btn" style="background: #fd79a8;" onclick="viewOrderDetails({{ order.id }})">
+                            <i class="fas fa-eye me-1"></i>Detaje
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <img src="{% static 'images/no-orders.svg' %}" alt="Nuk ka porosi" style="max-width: 300px;">
+                <h4 class="mt-4 mb-3">Nuk ka porosi ende</h4>
+                <p class="text-muted mb-4">Porositë do të shfaqen këtu sapo të marri të parat.</p>
+                <a href="{% url 'product:list' %}" class="btn btn-success">
+                    <i class="fas fa-plus-circle me-2"></i>Promovo Produktet
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Load More -->
+    {% if orders.has_next %}
+    <div class="text-center mt-4">
+        <button class="btn btn-outline-success btn-lg" onclick="loadMoreOrders()">
+            <i class="fas fa-spinner fa-spin me-2" style="display: none;"></i>
+            Ngarko më shumë porosi
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Communication Modal -->
+<div class="modal fade" id="communicationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Komunikim me Klientin</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="communication-panel" id="messageHistory">
+                    <!-- Messages will be loaded here -->
+                </div>
+                <div class="mt-3">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Shkruani mesazhin tuaj..." id="messageInput">
+                        <button class="btn btn-success" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-secondary me-2" onclick="insertTemplate('delivery')">
+                        📦 Template dorëzimi
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary me-2" onclick="insertTemplate('delay')">
+                        ⏰ Template vonese
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="insertTemplate('thanks')">
+                        🙏 Template falënderimi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order Details Modal -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detajet e Porosisë</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="orderDetailsContent">
+                <!-- Order details will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Toast -->
+<div class="notification-toast" id="notificationToast">
+    <div class="d-flex align-items-center">
+        <i class="fas fa-bell me-2"></i>
+        <div class="flex-grow-1">
+            <h6 class="mb-0" id="toastTitle">Njoftim</h6>
+            <small id="toastMessage">Mesazh</small>
+        </div>
+        <button class="btn-close btn-sm" onclick="hideNotification()"></button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Global variables
+let currentOrderId = null;
+let realTimeConnection = null;
+let messageTemplates = {
+    delivery: "Përshëndetje! Porosia juaj është gati për dorëzim. Do të vijë nesër në orën 10:00.",
+    delay: "Na vjen keq për vonesen. Porosia juaj do të dorëzohet me 2 orë vonë për shkak të kushteve të motit.",
+    thanks: "Faleminderit për porosinë! Jeni një klient i çmuar për ne. 😊"
+};
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    initializeRealTimeUpdates();
+    initializeFilters();
+    initializeSearch();
+    loadNotifications();
+});
+
+// Real-time Updates
+function initializeRealTimeUpdates() {
+    // Simulate WebSocket connection for real-time updates
+    setInterval(() => {
+        checkForOrderUpdates();
+    }, 30000); // Check every 30 seconds
+    
+    // Simulate real-time order status updates
+    setInterval(() => {
+        updateOrderCounts();
+    }, 10000); // Update counts every 10 seconds
+}
+
+function checkForOrderUpdates() {
+    // Simulate checking for new orders or status changes
+    if (Math.random() > 0.8) { // 20% chance
+        const updates = [
+            { type: 'new_order', message: 'Porosi e re nga Ana Dema' },
+            { type: 'status_change', message: 'Porosia #12845 u dorëzua' },
+            { type: 'message', message: 'Mesazh i ri nga Marko Gjoni' }
+        ];
+        
+        const update = updates[Math.floor(Math.random() * updates.length)];
+        showNotification(update.type, update.message);
+        
+        if (update.type === 'new_order') {
+            // Increment pending orders count
+            const pendingElement = document.getElementById('pendingOrders');
+            const currentCount = parseInt(pendingElement.textContent);
+            pendingElement.textContent = currentCount + 1;
+            
+            // Add visual indicator
+            pendingElement.style.animation = 'pulse 1s ease-in-out';
+            setTimeout(() => {
+                pendingElement.style.animation = '';
+            }, 1000);
+        }
+    }
+}
+
+function updateOrderCounts() {
+    // Simulate small changes in order counts
+    const elements = ['totalOrders', 'pendingOrders', 'processingOrders', 'shippingOrders', 'deliveredOrders'];
+    
+    elements.forEach(elementId => {
+        const element = document.getElementById(elementId);
+        if (element && Math.random() > 0.9) { // 10% chance of change
+            const currentValue = parseInt(element.textContent) || 0;
+            const change = Math.random() > 0.5 ? 1 : -1;
+            const newValue = Math.max(0, currentValue + change);
+            
+            if (newValue !== currentValue) {
+                element.textContent = newValue;
+                element.style.color = change > 0 ? '#28a745' : '#dc3545';
+                setTimeout(() => {
+                    element.style.color = '';
+                }, 2000);
+            }
+        }
+    });
+}
+
+// Filter Functions
+function initializeFilters() {
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.addEventListener('click', function() {
+            // Remove active class from all chips
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            
+            // Add active class to clicked chip
+            this.classList.add('active');
+            
+            // Filter orders
+            const status = this.dataset.status;
+            filterOrders(status);
+        });
+    });
+}
+
+function filterOrders(status) {
+    const orderItems = document.querySelectorAll('.order-item');
+    
+    orderItems.forEach(item => {
+        if (status === 'all') {
+            item.style.display = 'block';
+        } else if (status === 'urgent') {
+            // Show orders that are urgent (pending for more than 2 hours)
+            const isUrgent = item.querySelector('.status-pending');
+            item.style.display = isUrgent ? 'block' : 'none';
+        } else if (status === 'high-value') {
+            // Show high-value orders (> 5000 ALL)
+            const amount = parseFloat(item.querySelector('strong').textContent.replace(' ALL', ''));
+            item.style.display = amount > 5000 ? 'block' : 'none';
+        } else {
+            const itemStatus = item.dataset.status;
+            item.style.display = itemStatus === status ? 'block' : 'none';
+        }
+    });
+    
+    // Add animation
+    orderItems.forEach((item, index) => {
+        if (item.style.display !== 'none') {
+            item.style.animation = `fadeInUp 0.5s ease ${index * 0.1}s both`;
+        }
+    });
+}
+
+// Search Function
+function initializeSearch() {
+    const searchInput = document.getElementById('orderSearch');
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.toLowerCase();
+        
+        searchTimeout = setTimeout(() => {
+            searchOrders(query);
+        }, 300);
+    });
+}
+
+function searchOrders(query) {
+    const orderItems = document.querySelectorAll('.order-item');
+    
+    orderItems.forEach(item => {
+        const orderNumber = item.querySelector('h6').textContent.toLowerCase();
+        const customerName = item.querySelector('h6').nextElementSibling ? 
+            item.querySelector('h6').nextElementSibling.textContent.toLowerCase() : '';
+        
+        const matches = orderNumber.includes(query) || customerName.includes(query);
+        item.style.display = matches ? 'block' : 'none';
+    });
+}
+
+// Order Actions
+function confirmOrder(orderId) {
+    updateOrderStatus(orderId, 'confirmed', 'Porosia u konfirmua');
+}
+
+function cancelOrder(orderId) {
+    if (confirm('Jeni të sigurt që doni të anuloni këtë porosi?')) {
+        updateOrderStatus(orderId, 'cancelled', 'Porosia u anulua');
+    }
+}
+
+function startProcessing(orderId) {
+    updateOrderStatus(orderId, 'processing', 'Filloi përpunimi i porosisë');
+}
+
+function markAsShipping(orderId) {
+    updateOrderStatus(orderId, 'shipping', 'Porosia është dërguar');
+}
+
+function markAsDelivered(orderId) {
+    updateOrderStatus(orderId, 'delivered', 'Porosia u dorëzua');
+}
+
+function updateOrderStatus(orderId, newStatus, message) {
+    // Show loading state
+    const button = event.target.closest('button');
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    button.disabled = true;
+    button.classList.add('action-processing');
+    
+    // Simulate API call
+    setTimeout(() => {
+        // Update order status in UI
+        const orderCard = document.querySelector(`[data-order-id="${orderId}"]`);
+        const statusBadge = orderCard.querySelector('.order-status');
+        
+        // Update status badge
+        statusBadge.className = `order-status status-${newStatus}`;
+        statusBadge.textContent = getStatusDisplayName(newStatus);
+        
+        // Update timeline
+        updateOrderTimeline(orderCard, newStatus);
+        
+        // Update quick actions
+        updateQuickActions(orderCard, newStatus);
+        
+        // Show success notification
+        showNotification('success', message);
+        
+        // Restore button
+        button.innerHTML = originalHTML;
+        button.disabled = false;
+        button.classList.remove('action-processing');
+        
+    }, 1500); // Simulate network delay
+}
+
+function getStatusDisplayName(status) {
+    const statusNames = {
+        'pending': 'Në pritje',
+        'confirmed': 'Konfirmuar',
+        'processing': 'Në përpunim',
+        'shipping': 'Në transport',
+        'delivered': 'Dorëzuar',
+        'cancelled': 'Anuluar'
+    };
+    return statusNames[status] || status;
+}
+
+function updateOrderTimeline(orderCard, newStatus) {
+    const timeline = orderCard.querySelector('.timeline');
+    const markers = timeline.querySelectorAll('.timeline-marker');
+    
+    // Reset all markers
+    markers.forEach(marker => {
+        marker.classList.remove('completed', 'current');
+    });
+    
+    // Update based on new status
+    const statusOrder = ['pending', 'confirmed', 'processing', 'shipping', 'delivered'];
+    const currentIndex = statusOrder.indexOf(newStatus);
+    
+    markers.forEach((marker, index) => {
+        if (index < currentIndex) {
+            marker.classList.add('completed');
+        } else if (index === currentIndex) {
+            marker.classList.add('current');
+        }
+    });
+}
+
+function updateQuickActions(orderCard, newStatus) {
+    const actionsContainer = orderCard.querySelector('.quick-actions');
+    
+    // Clear existing action buttons (except message and view buttons)
+    const actionButtons = actionsContainer.querySelectorAll('button:not([onclick*="contactCustomer"]):not([onclick*="viewOrderDetails"])');
+    actionButtons.forEach(btn => btn.remove());
+    
+    // Add appropriate buttons based on new status
+    let newButtons = '';
+    
+    switch(newStatus) {
+        case 'confirmed':
+            newButtons = '<button class="quick-action-btn" onclick="startProcessing(' + orderCard.dataset.orderId + ')"><i class="fas fa-play me-1"></i>Fillo Përpunimin</button>';
+            break;
+        case 'processing':
+            newButtons = '<button class="quick-action-btn" onclick="markAsShipping(' + orderCard.dataset.orderId + ')"><i class="fas fa-truck me-1"></i>Dërgo</button>';
+            break;
+        case 'shipping':
+            newButtons = '<button class="quick-action-btn" onclick="markAsDelivered(' + orderCard.dataset.orderId + ')"><i class="fas fa-box-open me-1"></i>Dorëzuar</button>';
+            break;
+    }
+    
+    if (newButtons) {
+        actionsContainer.insertAdjacentHTML('afterbegin', newButtons);
+    }
+}
+
+// Communication Functions
+function contactCustomer(orderId) {
+    currentOrderId = orderId;
+    loadMessageHistory(orderId);
+    new bootstrap.Modal(document.getElementById('communicationModal')).show();
+}
+
+function loadMessageHistory(orderId) {
+    const messageHistory = document.getElementById('messageHistory');
+    
+    // Simulate loading messages
+    messageHistory.innerHTML = `
+        <div class="message-bubble received">
+            <div class="d-flex align-items-center mb-2">
+                <strong>Ana Dema</strong>
+                <small class="text-muted ms-2">10:30</small>
+            </div>
+            <p class="mb-0">Përshëndetje! Kur do të dorëzohet porosia ime?</p>
+        </div>
+        <div class="message-bubble sent">
+            <div class="d-flex align-items-center mb-2">
+                <strong>Ju</strong>
+                <small class="ms-2" style="opacity: 0.8;">10:45</small>
+            </div>
+            <p class="mb-0">Përshëndetje! Porosia juaj do të dorëzohet nesër në mëngjes. Faleminderit për durimin!</p>
+        </div>
+    `;
+}
+
+function sendMessage() {
+    const messageInput = document.getElementById('messageInput');
+    const message = messageInput.value.trim();
+    
+    if (!message) return;
+    
+    const messageHistory = document.getElementById('messageHistory');
+    const now = new Date();
+    const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
+                      now.getMinutes().toString().padStart(2, '0');
+    
+    // Add sent message
+    const messageHTML = `
+        <div class="message-bubble sent">
+            <div class="d-flex align-items-center mb-2">
+                <strong>Ju</strong>
+                <small class="ms-2" style="opacity: 0.8;">${timeString}</small>
+            </div>
+            <p class="mb-0">${message}</p>
+        </div>
+    `;
+    
+    messageHistory.insertAdjacentHTML('beforeend', messageHTML);
+    messageHistory.scrollTop = messageHistory.scrollHeight;
+    
+    // Clear input
+    messageInput.value = '';
+    
+    // Show success notification
+    showNotification('success', 'Mesazhi u dërgua');
+}
+
+function insertTemplate(type) {
+    const messageInput = document.getElementById('messageInput');
+    messageInput.value = messageTemplates[type];
+    messageInput.focus();
+}
+
+// Order Details
+function viewOrderDetails(orderId) {
+    // Load order details via AJAX
+    loadOrderDetails(orderId);
+    new bootstrap.Modal(document.getElementById('orderDetailsModal')).show();
+}
+
+function loadOrderDetails(orderId) {
+    const content = document.getElementById('orderDetailsContent');
+    
+    // Show loading
+    content.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+    
+    // Simulate API call
+    setTimeout(() => {
+        content.innerHTML = `
+            <div class="row">
+                <div class="col-md-8">
+                    <h6>Produktet e Porosisë</h6>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Produkti</th>
+                                    <th>Sasia</th>
+                                    <th>Çmimi</th>
+                                    <th>Totali</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Domate Cherry Bio</td>
+                                    <td>2 kg</td>
+                                    <td>300 ALL</td>
+                                    <td>600 ALL</td>
+                                </tr>
+                                <tr>
+                                    <td>Speca të Kuq</td>
+                                    <td>1.5 kg</td>
+                                    <td>250 ALL</td>
+                                    <td>375 ALL</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h6>Informacioni i Dorëzimit</h6>
+                    <p><strong>Adresa:</strong><br>Rruga "Mihal Duri", Pallati 12, Ap. 45<br>Tiranë</p>
+                    <p><strong>Telefoni:</strong> +355 69 123 4567</p>
+                    <p><strong>Shënim:</strong> Thirr para se të vish</p>
+                </div>
+            </div>
+        `;
+    }, 1000);
+}
+
+// Utility Functions
+function showNotification(type, message) {
+    const toast = document.getElementById('notificationToast');
+    const title = document.getElementById('toastTitle');
+    const messageEl = document.getElementById('toastMessage');
+    
+    title.textContent = type === 'success' ? 'Sukses' : 'Njoftim';
+    messageEl.textContent = message;
+    
+    toast.classList.add('show');
+    
+    setTimeout(() => {
+        hideNotification();
+    }, 5000);
+}
+
+function hideNotification() {
+    document.getElementById('notificationToast').classList.remove('show');
+}
+
+function clearFilters() {
+    // Reset filter chips
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.classList.remove('active');
+    });
+    document.querySelector('.filter-chip[data-status="all"]').classList.add('active');
+    
+    // Clear search
+    document.getElementById('orderSearch').value = '';
+    
+    // Show all orders
+    filterOrders('all');
+}
+
+function exportOrders() {
+    // Simulate export functionality
+    showNotification('success', 'Eksportimi filloi. Do të merrni një email me linkun e shkarkimit.');
+}
+
+function bulkActions() {
+    // Show bulk actions modal or dropdown
+    alert('Funksionaliteti i veprimeve masive do të implementohet së shpejti!');
+}
+
+function loadMoreOrders() {
+    const button = event.target;
+    const spinner = button.querySelector('.fa-spinner');
+    
+    // Show loading
+    spinner.style.display = 'inline-block';
+    button.disabled = true;
+    
+    // Simulate loading more orders
+    setTimeout(() => {
+        spinner.style.display = 'none';
+        button.disabled = false;
+        showNotification('success', 'U ngarkuan 10 porosi të tjera');
+    }, 2000);
+}
+
+function loadNotifications() {
+    // Load and display recent notifications
+    setTimeout(() => {
+        showNotification('info', 'Mirë se erdhet në sistemin e menaxhimit të porosive!');
+    }, 1000);
+}
+
+// CSS Animation Keyframes
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

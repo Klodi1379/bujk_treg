@@ -1,0 +1,128 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "python.defaultInterpreterPath": "./venv_313/Scripts/python.exe",
+        "python.terminal.activateEnvironment": true,
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": false,
+        "python.linting.flake8Enabled": true,
+        "python.formatting.provider": "black",
+        "python.autoComplete.extraPaths": [
+            "./",
+            "./farmer",
+            "./product", 
+            "./marketplace",
+            "./logistics",
+            "./core"
+        ],
+        "files.exclude": {
+            "**/__pycache__": true,
+            "**/*.pyc": true,
+            "**/venv_313": false,
+            "**/.git": true
+        },
+        "emmet.includeLanguages": {
+            "django-html": "html"
+        },
+        "files.associations": {
+            "*.html": "django-html"
+        }
+    },
+    "extensions": {
+        "recommendations": [
+            "ms-python.python",
+            "ms-python.vscode-pylance",
+            "batisteo.vscode-django",
+            "formulahendry.auto-rename-tag",
+            "bradlc.vscode-tailwindcss",
+            "ms-vscode.vscode-json"
+        ]
+    },
+    "launch": {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "name": "Django: Run Server",
+                "type": "python",
+                "request": "launch",
+                "program": "${workspaceFolder}/manage.py",
+                "args": [
+                    "runserver",
+                    "--settings=agricultural_platform.settings_simple"
+                ],
+                "django": true,
+                "justMyCode": true
+            },
+            {
+                "name": "Django: Run Server (Debug)",
+                "type": "python",
+                "request": "launch",
+                "program": "${workspaceFolder}/manage.py",
+                "args": [
+                    "runserver",
+                    "--settings=agricultural_platform.settings_simple",
+                    "--noreload"
+                ],
+                "django": true,
+                "justMyCode": false
+            }
+        ]
+    },
+    "tasks": {
+        "version": "2.0.0",
+        "tasks": [
+            {
+                "label": "Django: Migrate",
+                "type": "shell",
+                "command": "${workspaceFolder}/venv_313/Scripts/python.exe",
+                "args": [
+                    "manage.py",
+                    "migrate",
+                    "--settings=agricultural_platform.settings_simple"
+                ],
+                "group": "build",
+                "presentation": {
+                    "echo": true,
+                    "reveal": "always",
+                    "focus": false,
+                    "panel": "shared"
+                },
+                "problemMatcher": []
+            },
+            {
+                "label": "Django: Create Superuser",
+                "type": "shell",
+                "command": "${workspaceFolder}/venv_313/Scripts/python.exe", 
+                "args": [
+                    "manage.py",
+                    "createsuperuser",
+                    "--settings=agricultural_platform.settings_simple"
+                ],
+                "group": "build",
+                "presentation": {
+                    "echo": true,
+                    "reveal": "always",
+                    "focus": true,
+                    "panel": "shared"
+                },
+                "problemMatcher": []
+            },
+            {
+                "label": "Django: Collect Static",
+                "type": "shell",
+                "command": "${workspaceFolder}/venv_313/Scripts/python.exe",
+                "args": [
+                    "manage.py",
+                    "collectstatic",
+                    "--noinput",
+                    "--settings=agricultural_platform.settings_simple"
+                ],
+                "group": "build"
+            }
+        ]
+    }
+}

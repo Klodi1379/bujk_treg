@@ -1,0 +1,424 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analizat e Biznesit - Dashboard Inteligjent{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/chart.js@4.0.0/dist/chart.min.css" rel="stylesheet">
+<style>
+.analytics-dashboard {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    min-height: 100vh;
+    padding: 20px 0;
+}
+
+.metric-card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(135deg, #198754, #146c43);
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.metric-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #198754;
+    margin-bottom: 5px;
+}
+
+.metric-change {
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.metric-change.positive {
+    color: #20c997;
+}
+
+.metric-change.negative {
+    color: #fd7e14;
+}
+
+.chart-container {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 25px;
+}
+
+.insights-card {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.time-filter {
+    display: flex;
+    background: #f8f9fa;
+    border-radius: 25px;
+    padding: 4px;
+}
+
+.time-filter-btn {
+    background: transparent;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.time-filter-btn.active {
+    background: #198754;
+    color: white;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analytics-dashboard">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1 class="mb-2">
+                    <i class="fas fa-chart-line text-success me-2"></i>
+                    Analizat e Biznesit
+                </h1>
+                <p class="text-muted mb-0">Monitoroni performancën dhe rritjen e biznesit tuaj</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="time-filter">
+                    <button class="time-filter-btn" onclick="setTimeRange('7d')">7 ditë</button>
+                    <button class="time-filter-btn active" onclick="setTimeRange('30d')">30 ditë</button>
+                    <button class="time-filter-btn" onclick="setTimeRange('90d')">90 ditë</button>
+                    <button class="time-filter-btn" onclick="setTimeRange('1y')">1 vit</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="metric-card">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="metric-number" id="totalRevenue">24,750</div>
+                            <h6 class="text-muted mb-1">Të Ardhura (ALL)</h6>
+                            <div class="metric-change positive">
+                                <i class="fas fa-arrow-up me-1"></i>+18.5% nga muaji i kaluar
+                            </div>
+                        </div>
+                        <div class="metric-icon" style="width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; background: linear-gradient(135deg, #198754, #146c43);">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6">
+                <div class="metric-card">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="metric-number text-info" id="totalOrders">342</div>
+                            <h6 class="text-muted mb-1">Porosi të Reja</h6>
+                            <div class="metric-change positive">
+                                <i class="fas fa-arrow-up me-1"></i>+12.3% nga muaji i kaluar
+                            </div>
+                        </div>
+                        <div class="metric-icon" style="width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; background: linear-gradient(135deg, #17a2b8, #138496);">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6">
+                <div class="metric-card">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="metric-number text-warning" id="avgOrderValue">72</div>
+                            <h6 class="text-muted mb-1">Vlera Mesatare (ALL)</h6>
+                            <div class="metric-change negative">
+                                <i class="fas fa-arrow-down me-1"></i>-3.2% nga muaji i kaluar
+                            </div>
+                        </div>
+                        <div class="metric-icon" style="width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; background: linear-gradient(135deg, #ffc107, #e0a800);">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6">
+                <div class="metric-card">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="metric-number text-danger" id="conversionRate">4.8</div>
+                            <h6 class="text-muted mb-1">Shkalla e Konvertimit (%)</h6>
+                            <div class="metric-change positive">
+                                <i class="fas fa-arrow-up me-1"></i>+0.8% nga muaji i kaluar
+                            </div>
+                        </div>
+                        <div class="metric-icon" style="width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; background: linear-gradient(135deg, #dc3545, #c82333);">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Insights -->
+        <div class="insights-card">
+            <h5 class="mb-3">
+                <i class="fas fa-brain me-2"></i>
+                Njohuri të Mendjeshme nga AI
+            </h5>
+            <div class="row">
+                <div class="col-md-4">
+                    <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                        <h6><i class="fas fa-trending-up me-2"></i>Trend Pozitiv</h6>
+                        <p class="mb-0">Shitjet e domateve organike kanë rritur 35% këtë muaj. Rekomandojmë rritjen e prodhimit.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                        <h6><i class="fas fa-clock me-2"></i>Koha Optimale</h6>
+                        <p class="mb-0">Klientët bëjnë më shumë porosi të mërkurën dhe të enjten në orën 14:00-16:00.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                        <h6><i class="fas fa-users me-2"></i>Segment i Ri</h6>
+                        <p class="mb-0">Identifikuam një segment të ri klientësh të interesuar për produkte premium bio.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row mb-4">
+            <!-- Revenue Chart -->
+            <div class="col-xl-8">
+                <div class="chart-container">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-area text-success me-2"></i>
+                            Të Ardhurat dhe Porositë
+                        </h5>
+                    </div>
+                    <div style="height: 400px;">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Products -->
+            <div class="col-xl-4">
+                <div class="chart-container">
+                    <h5 class="mb-3">
+                        <i class="fas fa-trophy text-warning me-2"></i>
+                        Produktet më të Suksesshme
+                    </h5>
+                    
+                    <div style="display: flex; align-items: center; padding: 15px; border-radius: 10px; margin-bottom: 10px; background: #f8f9fa;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #ffd700, #ffed4e); color: #333; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 15px;">1</div>
+                        <div style="flex-grow: 1;">
+                            <h6 class="mb-1">Domate Cherry Bio</h6>
+                            <small class="text-muted">145 kg të shitura • 4,350 ALL</small>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; padding: 15px; border-radius: 10px; margin-bottom: 10px; background: #f8f9fa;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #c0c0c0, #e8e8e8); color: #333; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 15px;">2</div>
+                        <div style="flex-grow: 1;">
+                            <h6 class="mb-1">Speca të Kuq</h6>
+                            <small class="text-muted">112 kg të shitura • 3,360 ALL</small>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; padding: 15px; border-radius: 10px; margin-bottom: 10px; background: #f8f9fa;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #cd7f32, #daa520); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 15px;">3</div>
+                        <div style="flex-grow: 1;">
+                            <h6 class="mb-1">Kastravec Tradicional</h6>
+                            <small class="text-muted">89 kg të shitura • 1,780 ALL</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.0.0/dist/chart.min.js"></script>
+<script>
+// Global variables
+let currentTimeRange = '30d';
+let revenueChart = null;
+
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+    animateMetrics();
+});
+
+function initializeCharts() {
+    // Revenue Chart
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    
+    revenueChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: generateDateLabels(30),
+            datasets: [{
+                label: 'Të Ardhura (ALL)',
+                data: generateRevenueData(30),
+                borderColor: '#198754',
+                backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            },
+            scales: {
+                x: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Ditë'
+                    }
+                },
+                y: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Të Ardhura (ALL)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function animateMetrics() {
+    // Animate metric numbers
+    const metrics = [
+        { element: 'totalRevenue', target: 24750, duration: 2000 },
+        { element: 'totalOrders', target: 342, duration: 1500 },
+        { element: 'avgOrderValue', target: 72, duration: 1800 },
+        { element: 'conversionRate', target: 4.8, duration: 2200 }
+    ];
+    
+    metrics.forEach(metric => {
+        animateNumber(metric.element, metric.target, metric.duration);
+    });
+}
+
+function animateNumber(elementId, target, duration) {
+    const element = document.getElementById(elementId);
+    const start = 0;
+    const increment = target / (duration / 16);
+    let current = start;
+    
+    const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+            current = target;
+            clearInterval(timer);
+        }
+        
+        if (elementId === 'conversionRate') {
+            element.textContent = current.toFixed(1);
+        } else {
+            element.textContent = Math.round(current).toLocaleString();
+        }
+    }, 16);
+}
+
+function setTimeRange(range) {
+    currentTimeRange = range;
+    
+    // Update active button
+    document.querySelectorAll('.time-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // Update chart data
+    updateChartData(range);
+}
+
+function updateChartData(range) {
+    const days = {
+        '7d': 7,
+        '30d': 30,
+        '90d': 90,
+        '1y': 365
+    };
+    
+    const numDays = days[range] || 30;
+    
+    revenueChart.data.labels = generateDateLabels(numDays);
+    revenueChart.data.datasets[0].data = generateRevenueData(numDays);
+    revenueChart.update();
+}
+
+function generateDateLabels(days) {
+    const labels = [];
+    const today = new Date();
+    
+    for (let i = days - 1; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        labels.push(date.toLocaleDateString('sq-AL', { month: 'short', day: 'numeric' }));
+    }
+    
+    return labels;
+}
+
+function generateRevenueData(days) {
+    const data = [];
+    let baseValue = 800;
+    
+    for (let i = 0; i < days; i++) {
+        // Add some randomness and trend
+        const trend = i * 5; // Slight upward trend
+        const randomness = (Math.random() - 0.5) * 200;
+        data.push(Math.max(0, baseValue + trend + randomness));
+    }
+    
+    return data;
+}
+</script>
+{% endblock %}
