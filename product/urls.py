@@ -12,6 +12,7 @@ app_name = 'product'
 urlpatterns = [
     # Listimi dhe kërkimi i produkteve
     path('', views.ProductListView.as_view(), name='list'),
+    path('menaxho/', views.manage_products, name='manage_products'),
     path('kategoria/<slug:slug>/', views.category_products, name='category_products'),
 
     # Detajet dhe menaxhimi i produkteve

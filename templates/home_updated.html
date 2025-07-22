@@ -1,0 +1,689 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Platforma Bujqësore - Lidhja Direkte me Fermerët" %}{% endblock %}
+
+{% block extra_css %}
+<!-- Fonti Playfair Display për titujt kryesorë -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
+<!-- AOS library për animacionet në scroll -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<!-- Swiper për slider -->
+<link rel="stylesheet" href="https://unpkg.com/swiper@8/swiper-bundle.min.css"/>
+{% endblock %}
+
+{% block content %}
+<!-- Variablat CSS globale -->
+<style>
+:root {
+    --primary-color: #198754;
+    --primary-light: rgba(25, 135, 84, 0.1);
+    --primary-dark: #146c43;
+    --primary-gradient: linear-gradient(135deg, #198754, #146c43);
+    --accent-color: #ffc107;
+    --text-dark: #212529;
+    --text-muted: #6c757d;
+    --font-heading: 'Playfair Display', serif;
+    --transition-slow: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --transition-fast: all 0.3s ease;
+    --border-radius-sm: 8px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 20px;
+    --shadow-sm: 0 5px 15px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 10px 25px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.font-heading { font-family: var(--font-heading); }
+.reveal-item { opacity: 0; transition: opacity 1s ease; }
+.reveal-item.is-visible { opacity: 1; }
+
+/* Efekte të transformimit në hover */
+.transform-hover {
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+}
+
+.transform-hover:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Stilizimi i kartelave të produkteve */
+.product-card {
+    transition: var(--transition-fast);
+    border-radius: var(--border-radius-lg);
+}
+
+.product-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.product-card .product-image-wrapper img:hover {
+    transform: scale(1.05);
+}
+
+/* Animacioni i qarqeve në hero */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.6;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+}
+
+/* Gradient backgrounds for missing images */
+.hero-bg-gradient {
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+    opacity: 0.1;
+}
+
+.placeholder-img {
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-size: 3rem;
+}
+
+/* Swiper customization */
+.swiper-pagination-bullet {
+    background-color: var(--primary-color);
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+    color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    .display-3 {
+        font-size: 2.5rem;
+    }
+    
+    .display-4 {
+        font-size: 2rem;
+    }
+}
+</style>
+
+<!-- Hero Section -->
+<section class="hero position-relative overflow-hidden">
+    <!-- Background pattern -->
+    <div class="hero-bg position-absolute w-100 h-100 hero-bg-gradient" style="top: 0; left: 0; z-index: -1;"></div>
+
+    <!-- Animated circles -->
+    <div class="animated-circles position-absolute w-100 h-100" style="top: 0; left: 0; z-index: -1;">
+        <div class="circle circle-1 position-absolute rounded-circle" style="width: 300px; height: 300px; top: -150px; right: -150px; background: radial-gradient(circle, rgba(25,135,84,0.2) 0%, rgba(25,135,84,0) 70%); animation: pulse 15s infinite alternate;"></div>
+        <div class="circle circle-2 position-absolute rounded-circle" style="width: 200px; height: 200px; bottom: -100px; left: -100px; background: radial-gradient(circle, rgba(25,135,84,0.15) 0%, rgba(25,135,84,0) 70%); animation: pulse 12s infinite alternate-reverse;"></div>
+    </div>
+
+    <div class="container py-6" style="padding-top: 120px; padding-bottom: 120px;">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-5 mb-lg-0" data-aos="fade-right" data-aos-duration="1000">
+                <span class="badge text-white px-3 py-2 mb-3" style="background: var(--primary-gradient); border-radius: 30px;">
+                    <i class="fas fa-leaf me-1"></i> {% trans "E freskët nga ferma" %}
+                </span>
+                <h1 class="display-3 fw-bold font-heading mb-4 lh-1" style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    {% trans "Zbulo Shijen e Vërtetë të Natyrës" %}
+                </h1>
+                <p class="lead mb-5 pe-lg-5 text-muted">{% trans "Lidhje e drejtpërdrejtë me fermerët lokalë, produkte organike të garantuara dhe një eksperiencë e re blerje që mbështet bujqësinë shqiptare." %}</p>
+
+                <div class="d-flex gap-3 flex-wrap flex-sm-nowrap">
+                    {% if not user.is_authenticated %}
+                        <a href="{% url 'farmer:register' %}" class="btn px-4 py-3 w-100 text-white position-relative overflow-hidden" style="background: var(--primary-gradient); border-radius: var(--border-radius-lg); box-shadow: var(--shadow-md);">
+                            <span class="position-relative z-2">
+                                <i class="fas fa-seedling me-2"></i> {% trans "Bëhu Fermer" %}
+                            </span>
+                        </a>
+                        <a href="{% url 'product:list' %}" class="btn btn-outline-success px-4 py-3 w-100" style="border-radius: var(--border-radius-lg);">
+                            <i class="fas fa-shopping-basket me-2"></i> {% trans "Shfleto Produktet" %}
+                        </a>
+                    {% else %}
+                        <a href="{% url 'product:list' %}" class="btn px-4 py-3 w-100 text-white position-relative overflow-hidden" style="background: var(--primary-gradient); border-radius: var(--border-radius-lg); box-shadow: var(--shadow-md);">
+                            <span class="position-relative z-2">
+                                <i class="fas fa-shopping-basket me-2"></i> {% trans "Shiko Katalogun" %}
+                            </span>
+                        </a>
+                    {% endif %}
+                </div>
+
+                <div class="mt-5 d-flex align-items-center">
+                    <div class="d-flex">
+                        <div class="rounded-circle border-2 border-white position-relative placeholder-img" style="width: 40px; height: 40px; margin-right: -15px; z-index: 3; font-size: 1rem;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="rounded-circle border-2 border-white position-relative placeholder-img" style="width: 40px; height: 40px; margin-right: -15px; z-index: 2; font-size: 1rem;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="rounded-circle border-2 border-white position-relative placeholder-img" style="width: 40px; height: 40px; margin-right: -15px; z-index: 1; font-size: 1rem;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                    <div class="ms-4">
+                        <div class="d-flex align-items-center mb-1">
+                            <div class="text-warning me-2">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="fw-bold">4.9/5</span>
+                        </div>
+                        <p class="text-muted mb-0 small">{% trans "nga 2,300+ klientë të kënaqur" %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 position-relative d-none d-lg-block" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
+                <!-- Main hero image -->
+                <div class="position-relative rounded-4 overflow-hidden shadow-lg" style="height: 500px;">
+                    {% if 'farm-hero.jpg' in 'media/products/'|add:'farm-hero.jpg'|file_exists %}
+                        <img src="{% static 'media/products/farm-hero.jpg' %}" alt="{% trans 'Produkte të freskëta' %}" class="w-100 h-100" style="object-fit: cover;">
+                    {% else %}
+                        <div class="placeholder-img w-100 h-100 rounded-4">
+                            <i class="fas fa-seedling"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Floating elements -->
+                    <div class="position-absolute start-0 bottom-0 m-4 bg-white p-3 rounded-3 shadow-sm d-flex align-items-center" style="backdrop-filter: blur(10px); background-color: rgba(255,255,255,0.9);" data-aos="fade-up" data-aos-delay="600">
+                        <div class="bg-success text-white rounded-circle p-2 me-3">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0 small"><strong>{% trans "Dërgesa falas" %}</strong> {% trans "për porositë mbi 3000L" %}</p>
+                        </div>
+                    </div>
+
+                    <div class="position-absolute end-0 top-0 m-4 bg-white p-3 rounded-3 shadow-sm" style="backdrop-filter: blur(10px); background-color: rgba(255,255,255,0.9);" data-aos="fade-left" data-aos-delay="800">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-success rounded-circle p-2 d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+                                <i class="fas fa-leaf text-white"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0 fw-bold">{% trans "100% Organike" %}</p>
+                                <p class="mb-0 small text-muted">{% trans "E certifikuar" %}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wave separator -->
+    <div class="position-absolute bottom-0 start-0 w-100">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 110" fill="none" preserveAspectRatio="none" class="w-100" style="height: 80px;">
+            <path d="M0 30L48 35C96 40 192 50 288 52.2C384 54.3 480 48.7 576 56.8C672 65 768 87 864 91.8C960 96.7 1056 84.3 1152 72C1248 59.7 1344 47.3 1392 41.2L1440 35V110H1392C1344 110 1248 110 1152 110C1056 110 960 110 864 110C768 110 672 110 576 110C480 110 384 110 288 110C192 110 96 110 48 110H0V30Z" fill="white"/>
+        </svg>
+    </div>
+</section>
+
+<!-- Statistika Dinamike -->
+<section class="stats py-5 overflow-hidden">
+    <div class="container py-2">
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="100">
+                <div class="stat-card bg-white rounded-4 shadow-sm p-4 h-100 position-relative overflow-hidden">
+                    <div class="position-absolute top-0 end-0 w-50 h-50 opacity-10" style="background: radial-gradient(circle, var(--primary-color) 0%, transparent 70%);"></div>
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon d-flex align-items-center justify-content-center rounded-circle me-3" style="width: 60px; height: 60px; background-color: var(--primary-light);">
+                            <i class="fas fa-users fa-2x text-success"></i>
+                        </div>
+                        <div>
+                            <h2 class="display-6 fw-bold mb-0 counter" data-target="250">0</h2>
+                            <p class="text-muted mb-0">{% trans "Fermerë Aktivë" %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="200">
+                <div class="stat-card bg-white rounded-4 shadow-sm p-4 h-100 position-relative overflow-hidden">
+                    <div class="position-absolute top-0 end-0 w-50 h-50 opacity-10" style="background: radial-gradient(circle, var(--primary-color) 0%, transparent 70%);"></div>
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon d-flex align-items-center justify-content-center rounded-circle me-3" style="width: 60px; height: 60px; background-color: var(--primary-light);">
+                            <i class="fas fa-apple-alt fa-2x text-success"></i>
+                        </div>
+                        <div>
+                            <h2 class="display-6 fw-bold mb-0 counter" data-target="5000">0</h2>
+                            <p class="text-muted mb-0">{% trans "Produkte" %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="300">
+                <div class="stat-card bg-white rounded-4 shadow-sm p-4 h-100 position-relative overflow-hidden">
+                    <div class="position-absolute top-0 end-0 w-50 h-50 opacity-10" style="background: radial-gradient(circle, var(--primary-color) 0%, transparent 70%);"></div>
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon d-flex align-items-center justify-content-center rounded-circle me-3" style="width: 60px; height: 60px; background-color: var(--primary-light);">
+                            <i class="fas fa-map-marker-alt fa-2x text-success"></i>
+                        </div>
+                        <div>
+                            <h2 class="display-6 fw-bold mb-0 counter" data-target="36">0</h2>
+                            <p class="text-muted mb-0">{% trans "Rrethe" %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="400">
+                <div class="stat-card bg-white rounded-4 shadow-sm p-4 h-100 position-relative overflow-hidden">
+                    <div class="position-absolute top-0 end-0 w-50 h-50 opacity-10" style="background: radial-gradient(circle, var(--primary-color) 0%, transparent 70%);"></div>
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon d-flex align-items-center justify-content-center rounded-circle me-3" style="width: 60px; height: 60px; background-color: var(--primary-light);">
+                            <i class="fas fa-shopping-basket fa-2x text-success"></i>
+                        </div>
+                        <div>
+                            <h2 class="display-6 fw-bold mb-0 counter" data-target="12500">0</h2>
+                            <p class="text-muted mb-0">{% trans "Porosi të Suksesshme" %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features py-5 overflow-hidden">
+    <div class="container py-5">
+        <div class="row mb-5">
+            <div class="col-lg-6 mx-auto text-center" data-aos="fade-up">
+                <span class="badge text-white px-3 py-2 mb-3" style="background: var(--primary-gradient); border-radius: 30px;">
+                    <i class="fas fa-star me-1"></i> {% trans "Përparësitë tona" %}
+                </span>
+                <h2 class="display-4 fw-bold font-heading mb-3">{% trans "Pse Të Zgjedhni Platformën Tonë?" %}</h2>
+                <p class="lead text-muted mx-auto">{% trans "Një eksperiencë e re blerje që përmirëson jetën e fermerëve dhe konsumatorëve shqiptarë" %}</p>
+            </div>
+        </div>
+
+        <div class="row g-5">
+            <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-card h-100 position-relative bg-white shadow-sm rounded-4 p-1 overflow-hidden transform-hover">
+                    <div class="position-absolute top-0 end-0 w-25 h-25" style="background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);"></div>
+                    <div class="position-absolute bottom-0 start-0 w-25 h-25" style="background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);"></div>
+
+                    <div class="card-body p-4">
+                        <div class="feature-icon-wrapper mb-4 position-relative">
+                            <div class="feature-icon-bg position-absolute rounded-circle" style="width: 70px; height: 70px; background-color: var(--primary-light); top: -5px; left: -5px;"></div>
+                            <div class="position-relative rounded-circle bg-white d-flex align-items-center justify-content-center p-4 shadow-sm" style="width: 70px; height: 70px; z-index: 1;">
+                                <i class="fas fa-handshake fa-2x text-success"></i>
+                            </div>
+                        </div>
+
+                        <h3 class="fw-bold h4 mb-3">{% trans "Lidhje Direkte me Fermerët" %}</h3>
+                        <p class="text-muted mb-0">{% trans "Eliminoni ndërmjetësit dhe mbështesni direkt ekonominë rurale. Njihuni me prodhuesit dhe historinë pas ushqimit tuaj." %}</p>
+
+                        <div class="feature-benefits mt-4">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <span class="small">{% trans "Çmime 20-30% më të ulëta" %}</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <span class="small">{% trans "Mbështetje për fermerët vendas" %}</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <span class="small">{% trans "Transparencë në origjinë" %}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-card h-100 position-relative bg-white shadow-sm rounded-4 p-1 overflow-hidden transform-hover">
+                    <div class="position-absolute top-0 end-0 w-25 h-25" style="background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);"></div>
+                    <div class="position-absolute bottom-0 start-0 w-25 h-25" style="background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);"></div>
+
+                    <div class="card-body p-4">
+                        <div class="feature-icon-wrapper mb-4 position-relative">
+                            <div class="feature-icon-bg position-absolute rounded-circle" style="width: 70px; height: 70px; background-color: var(--primary-light); top: -5px; left: -5px;"></div>
+                            <div class="position-relative rounded-circle bg-white d-flex align-items-center justify-content-center p-4 shadow-sm" style="width: 70px; height: 70px; z-index: 1;">
+                                <i class="fas fa-leaf fa-2x text-success"></i>
+                            </div>
+                        </div>
+
+                        <h3 class="fw-bold h4 mb-3">{% trans "Produkte të Freskëta dhe Cilësore" %}</h3>
+                        <p class="text-muted mb-0">{% trans "Çdo produkt korret në kohën optimale dhe dorëzohet shpejt te ju. Shijoni shijen e vërtetë të ushqimit të kultivuar me kujdes." %}</p>
+
+                        <div class="feature-benefits mt-4">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <span class="small">{% trans "Korrja 24-48 orë para dorëzimit" %}</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <span class="small">{% trans "Varietete tradicionale shqiptare" %}</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <span class="small">{% trans "Pa pesticide të dëmshme" %}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="feature-card h-100 position-relative bg-white shadow-sm rounded-4 p-1 overflow-hidden transform-hover">
+                    <div class="position-absolute top-0 end-0 w-25 h-25" style="background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);"></div>
+                    <div class="position-absolute bottom-0 start-0 w-25 h-25" style="background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);"></div>
+
+                    <div class="card-body p-4">
+                        <div class="feature-icon-wrapper mb-4 position-relative">
+                            <div class="feature-icon-bg position-absolute rounded-circle" style="width: 70px; height: 70px; background-color: var(--primary-light); top: -5px; left: -5px;"></div>
+                            <div class="position-relative rounded-circle bg-white d-flex align-items-center justify-content-center p-4 shadow-sm" style="width: 70px; height: 70px; z-index: 1;">
+                                <i class="fas fa-truck fa-2x text-success"></i>
+                            </div>
+                        </div>
+
+                        <h3 class="fw-bold h4 mb-3">{% trans "Dërgesa e Sigurt dhe e Shpejtë" %}</h3>
+                        <p class="text-muted mb-0">{% trans "Transporti i optimizuar siguron ruajtjen e freskinë dhe ushqyesve. Monitoroni porosinën tuaj në çdo hap të rrugës." %}</p>
+
+                        <div class="feature-benefits mt-4">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <span class="small">{% trans "Dërgesa brenda 24 orëve" %}</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <span class="small">{% trans "Paketim ekologjik" %}</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <span class="small">{% trans "Gjurmim në kohë reale" %}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Latest Products Section -->
+<section class="latest-products py-5 bg-light position-relative overflow-hidden">
+    <!-- Elementë dekorativë -->
+    <div class="position-absolute" style="width: 300px; height: 300px; top: 0; right: 0; background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%); z-index: 0;"></div>
+    <div class="position-absolute" style="width: 200px; height: 200px; bottom: 10%; left: 5%; background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%); z-index: 0;"></div>
+
+    <div class="container py-5 position-relative">
+        <div class="row mb-5">
+            <div class="col-lg-6 mx-auto text-center" data-aos="fade-up">
+                <span class="badge text-white px-3 py-2 mb-3" style="background: var(--primary-gradient); border-radius: 30px;">
+                    <i class="fas fa-carrot me-1"></i> {% trans "E freskët nga ferma" %}
+                </span>
+                <h2 class="display-4 fw-bold font-heading mb-3">{% trans "Produktet e Fundit" %}</h2>
+                <p class="lead text-muted mx-auto">{% trans "Zbuloni produktet e sapo-shtuar nga fermerët tanë të besueshëm" %}</p>
+            </div>
+        </div>
+
+        <!-- Swiper slider për produktet -->
+        <div class="swiper products-slider" data-aos="fade-up" data-aos-delay="200">
+            <div class="swiper-wrapper pb-5">
+                {% for product in latest_products %}
+                <div class="swiper-slide">
+                    <div class="product-card h-100 bg-white rounded-4 shadow-sm overflow-hidden">
+                        <div class="product-image-wrapper position-relative">
+                            {% if product.images.exists %}
+                                <img src="{{ product.images.first.image.url }}" class="w-100" alt="{{ product.name }}" style="height: 240px; object-fit: cover; transition: var(--transition-slow);">
+                            {% else %}
+                                <div class="placeholder-img w-100" style="height: 240px;">
+                                    <i class="fas fa-apple-alt"></i>
+                                </div>
+                            {% endif %}
+
+                            <!-- Overlay with quick actions -->
+                            <div class="product-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0,0,0,0.5); opacity: 0; transition: var(--transition-fast);">
+                                <a href="{% url 'product:detail' product.slug %}" class="btn btn-light btn-sm rounded-circle mx-1" data-bs-toggle="tooltip" title="{% trans 'Shiko Detajet' %}">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="#" class="btn btn-light btn-sm rounded-circle mx-1" data-bs-toggle="tooltip" title="{% trans 'Shto në Shportë' %}">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </a>
+                                <a href="#" class="btn btn-light btn-sm rounded-circle mx-1" data-bs-toggle="tooltip" title="{% trans 'Shto në Të Preferuarat' %}">
+                                    <i class="far fa-heart"></i>
+                                </a>
+                            </div>
+
+                            <!-- Top corner badges -->
+                            <div class="product-badges position-absolute top-0 start-0 p-3 d-flex flex-column gap-2">
+                                <span class="badge bg-success rounded-pill px-3 py-2 shadow-sm mb-1">{% trans "I ri" %}</span>
+                                {% if product.organic %}
+                                <span class="badge bg-warning text-dark rounded-pill px-3 py-2 shadow-sm">{% trans "Bio" %}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="product-info p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h5 class="mb-0 fw-bold">{{ product.name }}</h5>
+                                    <div class="text-muted small">
+                                        <i class="fas fa-map-marker-alt me-1"></i> {{ product.farmer.location }}
+                                    </div>
+                                </div>
+                                <span class="price bg-success-subtle text-success fw-bold rounded-pill px-3 py-1">{{ product.price }} ALL</span>
+                            </div>
+
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-user-circle me-2 text-muted"></i>
+                                <span class="small text-muted">{{ product.farmer.name }}</span>
+                            </div>
+
+                            <p class="card-text text-muted mb-3 small">{{ product.description|truncatewords:15 }}</p>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="unit text-muted small">{{ product.get_unit_display }}</span>
+                                <a href="{% url 'product:detail' product.slug %}" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                                    {% trans "Shiko detajet" %}
+                                    <i class="fas fa-chevron-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5">
+                    <div class="empty-state p-5 rounded-4 bg-white shadow-sm">
+                        <div class="placeholder-img mb-4 mx-auto" style="width: 200px; height: 200px; font-size: 4rem;">
+                            <i class="fas fa-seedling"></i>
+                        </div>
+                        <h4 class="mb-3">{% trans "Nuk ka produkte të disponueshme" %}</h4>
+                        <p class="text-muted mb-4">{% trans "Produktet e reja do të shfaqen këtu sapo të shtohen nga fermerët tanë." %}</p>
+                        <a href="{% url 'farmer:register' %}" class="btn btn-outline-success rounded-pill px-4 py-2">
+                            <i class="fas fa-plus-circle me-2"></i> {% trans "Bëhu fermer dhe shto produktet e tua" %}
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+        </div>
+
+        {% if latest_products %}
+        <div class="text-center mt-5" data-aos="fade-up" data-aos-delay="300">
+            <a href="{% url 'product:list' %}" class="btn btn-outline-success btn-lg rounded-pill px-5 py-3">
+                <i class="fas fa-th-large me-2"></i> {% trans "Shiko të gjitha produktet" %}
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="cta py-5 position-relative overflow-hidden">
+    <div class="cta-bg position-absolute w-100 h-100" style="background: var(--primary-gradient); top: 0; left: 0; z-index: -2;"></div>
+    <div class="cta-pattern position-absolute w-100 h-100" style="background-image: url('data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Ccircle cx=\'2\' cy=\'2\' r=\'2\' fill=\'%23ffffff\' fill-opacity=\'0.2\'/%3E%3C/svg%3E'); top: 0; left: 0; z-index: -1;"></div>
+    
+    <!-- Decorative elements -->
+    <div class="decorative-item position-absolute rounded-circle" style="width: 200px; height: 200px; background: rgba(255,255,255,0.1); top: -100px; right: 10%; z-index: 0;"></div>
+    <div class="decorative-item position-absolute rounded-circle" style="width: 300px; height: 300px; background: rgba(255,255,255,0.1); bottom: -150px; left: -100px; z-index: 0;"></div>
+    
+    <div class="container py-5 position-relative">
+        <div class="row align-items-center">
+            <div class="col-lg-7 mb-5 mb-lg-0 text-white" data-aos="fade-right">
+                <h2 class="display-3 fw-bold font-heading mb-4">{% trans "Gati për të Shijuar Shijen e Vërtetë?" %}</h2>
+                <p class="lead mb-5 opacity-75">{% trans "Bashkohuni me mijëra klientë të kënaqur që kanë zbuluar tashmë freskinë dhe cilësinë e produkteve direkt nga ferma." %}</p>
+                
+                <div class="cta-features mb-5">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="feature-check rounded-circle bg-white text-success d-flex align-items-center justify-content-center me-3" style="width: 30px; height: 30px;">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <p class="mb-0 opacity-75">{% trans "Produkte të freskëta të dorëzuara brenda 24 orëve" %}</p>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="feature-check rounded-circle bg-white text-success d-flex align-items-center justify-content-center me-3" style="width: 30px; height: 30px;">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <p class="mb-0 opacity-75">{% trans "Lidhje direkte me fermerët lokalë" %}</p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="feature-check rounded-circle bg-white text-success d-flex align-items-center justify-content-center me-3" style="width: 30px; height: 30px;">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <p class="mb-0 opacity-75">{% trans "Kthim pa pyetje nëse nuk jeni të kënaqur" %}</p>
+                    </div>
+                </div>
+                
+                {% if not user.is_authenticated %}
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a href="{% url 'farmer:register' %}" class="btn btn-light btn-lg px-5 py-3 rounded-pill shadow fw-bold text-success">
+                            <i class="fas fa-tractor me-2"></i> {% trans "Bëhu Fermer" %}
+                        </a>
+                        <a href="{% url 'product:list' %}" class="btn btn-outline-light btn-lg px-5 py-3 rounded-pill">
+                            <i class="fas fa-shopping-basket me-2"></i> {% trans "Shfleto Produktet" %}
+                        </a>
+                    </div>
+                {% else %}
+                    <a href="{% url 'product:list' %}" class="btn btn-light btn-lg px-5 py-3 rounded-pill shadow fw-bold text-success">
+                        <i class="fas fa-shopping-basket me-2"></i> {% trans "Shiko Katalogun Tani" %}
+                    </a>
+                {% endif %}
+            </div>
+            
+            <div class="col-lg-5 d-none d-lg-block" data-aos="fade-left">
+                <div class="cta-image position-relative">
+                    <div class="placeholder-img rounded-4 shadow-lg" style="height: 400px; font-size: 5rem;">
+                        <i class="fas fa-shopping-basket"></i>
+                    </div>
+                    <div class="position-absolute start-0 bottom-0 p-4 bg-white rounded-4 shadow-lg transform-hover" style="width: 220px; margin-left: -30px; margin-bottom: -20px;">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0 me-3">
+                                <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fas fa-percent"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h5 class="text-success fw-bold mb-0">{% trans "20% ZBRITJE" %}</h5>
+                                <p class="small text-muted mb-0">{% trans "në porosinë e parë" %}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- JavaScript për funksionalitetin -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="https://unpkg.com/swiper@8/swiper-bundle.min.js"></script>
+<script>
+    // Inicializimi i AOS (Animate on Scroll)
+    document.addEventListener('DOMContentLoaded', function() {
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+        
+        // Inicializimi i Swiper për produktet
+        const productsSwiper = new Swiper('.products-slider', {
+            slidesPerView: 1,
+            spaceBetween: 20,
+            loop: true,
+            pagination: {
+                el: '.products-slider .swiper-pagination',
+                clickable: true
+            },
+            navigation: {
+                nextEl: '.products-slider .swiper-button-next',
+                prevEl: '.products-slider .swiper-button-prev'
+            },
+            breakpoints: {
+                640: {
+                    slidesPerView: 2
+                },
+                992: {
+                    slidesPerView: 3
+                }
+            }
+        });
+        
+        // Animacionet e numëratorëve në statistikat
+        const counters = document.querySelectorAll('.counter');
+        const speed = 200; // Sa më i ulët, aq më shpejt
+        
+        counters.forEach(counter => {
+            const animate = () => {
+                const value = +counter.getAttribute('data-target');
+                const data = +counter.innerText;
+                
+                const time = value / speed;
+                if (data < value) {
+                    counter.innerText = Math.ceil(data + time);
+                    setTimeout(animate, 1);
+                } else {
+                    counter.innerText = value;
+                }
+            }
+            
+            // Startimi i animacionit kur elementi është në pamje
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        animate();
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            observer.observe(counter);
+        });
+        
+        // Aktivizimi i tooltips për kartat e produkteve
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Efekti hover për kartat e produkteve
+        document.querySelectorAll('.product-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.querySelector('.product-overlay').style.opacity = '1';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.querySelector('.product-overlay').style.opacity = '0';
+            });
+        });
+    });
+</script>
+
+{% endblock %}

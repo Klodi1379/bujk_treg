@@ -2,6 +2,7 @@
 Production settings for agricultural platform.
 """
 from .base import *
+from .security import *  # Import security configuration
 import dj_database_url
 
 # Security settings

@@ -1,0 +1,84 @@
+# Agricultural Platform - Production Requirements  
+# Standardized on Django 4.2 LTS for stability and long-term support
+# Compatible with Python 3.11+ (recommended: Python 3.12)
+
+# =============================================================================
+# CORE FRAMEWORK - Django 4.2 LTS (Long Term Support until April 2026)  
+# =============================================================================
+Django==4.2.16  # Latest stable LTS version
+python-dotenv==1.0.1
+
+# =============================================================================
+# DATABASE & ORM
+# =============================================================================
+psycopg2-binary==2.9.9  # PostgreSQL adapter - production ready
+dj-database-url==2.2.0  # Database URL parsing
+
+# =============================================================================
+# API & REST FRAMEWORK
+# =============================================================================
+djangorestframework==3.15.2  # Latest stable DRF
+djangorestframework-simplejwt==5.3.0  # JWT authentication
+django-cors-headers==4.4.0  # CORS handling for API
+django-filter==24.3  # Advanced filtering for APIs
+drf-spectacular==0.27.2  # OpenAPI 3.0 documentation
+
+# =============================================================================
+# CACHING & PERFORMANCE
+# =============================================================================
+django-redis==5.4.0  # Redis cache backend
+redis==5.1.0  # Redis client
+django-extensions==3.2.3  # Development utilities
+
+# =============================================================================
+# STATIC FILES & MEDIA STORAGE
+# =============================================================================
+whitenoise[brotli]==6.7.0  # Static file serving with compression
+django-storages[s3]==1.14.4  # Cloud storage backends
+boto3==1.35.0  # AWS SDK for S3
+
+# =============================================================================
+# FORMS & UI ENHANCEMENTS
+# =============================================================================
+django-crispy-forms==2.3  # Enhanced form rendering
+crispy-bootstrap5==2024.2  # Bootstrap 5 templates
+django-widget-tweaks==1.5.0  # Form widget customization
+
+# =============================================================================
+# SECURITY (Production Critical)
+# =============================================================================
+django-ratelimit==4.1.0  # API rate limiting
+django-axes==6.5.0  # Brute force protection
+django-csp==3.8  # Content Security Policy
+django-permissions-policy==4.20.0  # Permissions Policy headers
+
+# =============================================================================
+# BACKGROUND TASKS & MESSAGING
+# =============================================================================
+celery[redis]==5.4.0  # Distributed task queue
+kombu==5.4.0  # Message broker abstraction
+
+# =============================================================================
+# MONITORING & ERROR TRACKING
+# =============================================================================
+sentry-sdk[django]==2.14.0  # Error tracking and performance monitoring
+django-health-check==3.18.3  # Health check endpoints
+
+# =============================================================================
+# IMAGE & FILE PROCESSING
+# =============================================================================
+Pillow==10.4.0  # Image processing
+python-magic==0.4.27  # File type detection
+
+# =============================================================================
+# PRODUCTION SERVER
+# =============================================================================
+gunicorn==23.0.0  # WSGI HTTP server
+uvicorn[standard]==0.30.6  # ASGI server for WebSocket support
+
+# =============================================================================
+# UTILITIES & HELPERS
+# =============================================================================
+python-dateutil==2.9.0  # Enhanced date/time handling
+requests==2.32.3  # HTTP client
+pytz==2024.2  # Timezone handling

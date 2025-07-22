@@ -1,0 +1,46 @@
+# Agricultural Platform - Development Requirements
+# Includes all production requirements plus development/testing tools
+# Use this file for local development and testing
+
+# Include all production requirements
+-r requirements-production.txt
+
+# =============================================================================
+# DEVELOPMENT & DEBUGGING TOOLS
+# =============================================================================
+django-debug-toolbar==4.4.0  # Development debugging panel
+django-silk==5.1.0  # Performance profiling
+ipython==8.30.0  # Enhanced Python shell
+ipdb==0.13.13  # Enhanced debugger
+
+# =============================================================================
+# TESTING FRAMEWORK
+# =============================================================================
+pytest==8.3.3  # Modern testing framework
+pytest-django==4.9.0  # Django integration for pytest
+pytest-cov==5.0.0  # Coverage reporting
+pytest-xdist==3.6.0  # Parallel test execution
+factory-boy==3.3.1  # Test data factories
+faker==30.8.2  # Fake data generation
+model-bakery==1.19.5  # Django model instances for testing
+
+# =============================================================================
+# CODE QUALITY & FORMATTING
+# =============================================================================
+black==24.10.0  # Code formatting
+isort==5.13.2  # Import sorting
+flake8==7.1.1  # Code linting
+mypy==1.13.0  # Static type checking
+django-stubs==5.1.0  # Django type stubs for mypy
+bandit==1.7.10  # Security vulnerability scanner
+
+# =============================================================================
+# LOAD TESTING & PERFORMANCE
+# =============================================================================
+locust==2.32.4  # Load testing framework
+django-query-profiler==1.4.0  # Query performance monitoring
+
+# =============================================================================
+# DATABASE TOOLS
+# =============================================================================
+django-migration-linter==5.1.0  # Migration safety checks

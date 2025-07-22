@@ -9,7 +9,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib import messages
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-from django.db.models import Sum
+from django.db.models import Sum, Avg
 from django.utils.translation import gettext_lazy as _
 
 def login_view(request):
@@ -107,6 +107,78 @@ def farmer_dashboard(request):
     
     return render(request, 'farmer/dashboard.html', context)
 
+@login_required
+def smart_dashboard(request):
+    """Smart dashboard with AI insights for farmers"""
+    try:
+        farmer = request.user.farmer_profile
+    except FarmerProfile.DoesNotExist:
+        return redirect('farmer:register')
+    
+    # Get farmer's crops with detailed information
+    farmer_crops = FarmerCrop.objects.filter(farmer=farmer).select_related('crop')
+    
+    # Get recent production logs
+    recent_logs = ProductionLog.objects.filter(
+        farmer=farmer
+    ).select_related('crop').order_by('-date')[:10]
+    
+    # Calculate basic statistics
+    total_area = farmer_crops.aggregate(total=Sum('land_area'))['total'] or 0
+    crop_count = farmer_crops.count()
+    total_estimated_yield = farmer_crops.aggregate(total=Sum('estimated_yield'))['total'] or 0
+    
+    # Activity analysis from production logs
+    activity_stats = {}
+    for log in ProductionLog.objects.filter(farmer=farmer):
+        activity = log.activity_type
+        if activity in activity_stats:
+            activity_stats[activity] += 1
+        else:
+            activity_stats[activity] = 1
+    
+    # Prepare crop performance data based on estimated yield and production activities
+    crop_performance = []
+    for crop in farmer_crops:
+        # Count production activities for this crop
+        activity_count = ProductionLog.objects.filter(farmer=farmer, crop=crop.crop).count()
+        
+        # Get latest activity
+        latest_activity = ProductionLog.objects.filter(
+            farmer=farmer, crop=crop.crop
+        ).order_by('-date').first()
+        
+        crop_performance.append({
+            'crop': crop,
+            'estimated_yield': crop.estimated_yield or 0,
+            'activity_count': activity_count,
+            'latest_activity': latest_activity,
+            'land_area': crop.land_area,
+        })
+    
+    # Calculate average estimated yield per hectare
+    avg_estimated_yield = farmer_crops.aggregate(avg=Avg('estimated_yield'))['avg'] or 0
+    
+    # Recent activities summary
+    recent_activity_types = ProductionLog.objects.filter(
+        farmer=farmer
+    ).order_by('-date')[:5].values_list('activity_type', flat=True)
+    
+    context = {
+        'farmer': farmer,
+        'farmer_crops': farmer_crops,
+        'recent_logs': recent_logs,
+        'total_area': total_area,
+        'crop_count': crop_count,
+        'total_estimated_yield': total_estimated_yield,
+        'avg_estimated_yield': avg_estimated_yield,
+        'activity_stats': activity_stats,
+        'crop_performance': crop_performance,
+        'recent_activity_types': list(recent_activity_types),
+    }
+    
+    return render(request, 'farmer/smart_dashboard.html', context)
+
 class FarmerProfileDetailView(DetailView):
     model = FarmerProfile
     template_name = 'farmer/profile_detail.html'
@@ -123,6 +195,7 @@ class FarmerProfileUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateVie
     model = FarmerProfile
     form_class = FarmerProfileUpdateForm
     template_name = 'farmer/profile_update.html'
+    context_object_name = 'farmer'
     success_url = reverse_lazy('farmer:dashboard')
 
     def test_func(self):

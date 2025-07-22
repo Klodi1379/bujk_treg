@@ -159,11 +159,14 @@
                         <a href="{% url 'farmer:add_production_log' %}" class="btn btn-outline-success">
                             <i class="fas fa-plus me-2"></i>Shto Regjistër Prodhimi
                         </a>
-                        <a href="{% url 'product:add_product' %}" class="btn btn-outline-success">
+                        <a href="{% url 'product:add' %}" class="btn btn-outline-success">
                             <i class="fas fa-box me-2"></i>Shto Produkt të Ri
                         </a>
                         <a href="{% url 'farmer:manage_crops' %}" class="btn btn-outline-success">
                             <i class="fas fa-seedling me-2"></i>Menaxho Kulturat
+                        </a>
+                        <a href="{% url 'core:weather_dashboard' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-cloud-sun me-2"></i>Dashboard i Motit
                         </a>
                     </div>
                 </div>

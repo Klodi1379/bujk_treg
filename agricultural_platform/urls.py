@@ -13,6 +13,7 @@ urlpatterns = i18n_patterns (
     path('product/', include('product.urls')),
     path('marketplace/', include('marketplace.urls')),
     path('logistics/', include('logistics.urls')), # Ensure logistics URLs are included
+    path('', include('core.urls')), # Smart services URLs
     path('admin/', admin.site.urls),
 )
 

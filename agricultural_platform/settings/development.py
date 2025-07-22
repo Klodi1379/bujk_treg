@@ -29,10 +29,11 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_CREDENTIALS = True
 
-# Development cache (use dummy cache)
+# Development cache (use local memory cache instead of dummy cache)
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
     }
 }
 
@@ -60,3 +61,9 @@ if DEBUG:
 
 # Development media storage
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+# Authentication backends for axes
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesStandaloneBackend',  # Axes backend
+    'django.contrib.auth.backends.ModelBackend',  # Default Django backend
+]

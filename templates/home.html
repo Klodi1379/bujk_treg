@@ -3,15 +3,9 @@
 
 {% block title %}Platforma Bujqësore - Lidhja Direkte me Fermerët{% endblock %}
 
-{% block extrahead %}
-<!-- Fonti Playfair Display për titujt kryesorë -->
+{% block extra_css %}
+<!-- Fonti për titujt -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
-<!-- AOS library për animacionet në scroll -->
-<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-<!-- Swiper për slider -->
-<link rel="stylesheet" href="https://unpkg.com/swiper@8/swiper-bundle.min.css"/>
-<script src="https://unpkg.com/swiper@8/swiper-bundle.min.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -25,9 +19,9 @@
     --accent-color: #ffc107;
     --text-dark: #212529;
     --text-muted: #6c757d;
-    --font-heading: 'Playfair Display', serif;
-    --transition-slow: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    --transition-fast: all 0.3s ease;
+    --font-heading: "Playfair Display", serif;
+    --transition-slow: 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --transition-fast: 0.3s ease;
     --border-radius-sm: 8px;
     --border-radius-md: 12px;
     --border-radius-lg: 20px;
@@ -36,9 +30,18 @@
     --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
-.font-heading { font-family: var(--font-heading); }
-.reveal-item { opacity: 0; transition: opacity 1s ease; }
-.reveal-item.is-visible { opacity: 1; }
+.font-heading { 
+    font-family: var(--font-heading); 
+}
+
+.reveal-item {
+    opacity: 0;
+    transition: opacity var(--transition-slow);
+}
+
+.reveal-item.is-visible {
+    opacity: 1;
+}
 </style>
 
 <!-- Hero Section Transformuar -->
@@ -54,7 +57,7 @@
 
     <div class="container py-6" style="padding-top: 120px; padding-bottom: 120px;">
         <div class="row align-items-center">
-            <div class="col-lg-6 mb-5 mb-lg-0" data-aos="fade-right" data-aos-duration="1000">
+            <div class="col-lg-6 mb-5 mb-lg-0">
                 <span class="badge text-white px-3 py-2 mb-3" style="background: var(--primary-gradient); border-radius: 30px;">
                     <i class="fas fa-leaf me-1"></i> E freskët nga ferma
                 </span>
@@ -86,9 +89,15 @@
 
                 <div class="mt-5 d-flex align-items-center">
                     <div class="d-flex">
-                        <div class="rounded-circle border-2 border-white position-relative" style="width: 40px; height: 40px; margin-right: -15px; z-index: 3; background-image: url('{% static 'media/products/user1.jpg' %}'); background-size: cover;"></div>
-                        <div class="rounded-circle border-2 border-white position-relative" style="width: 40px; height: 40px; margin-right: -15px; z-index: 2; background-image: url('{% static 'media/products/user2.jpg' %}'); background-size: cover;"></div>
-                        <div class="rounded-circle border-2 border-white position-relative" style="width: 40px; height: 40px; margin-right: -15px; z-index: 1; background-image: url('{% static 'media/products/user3.jpg' %}'); background-size: cover;"></div>
+                        <div class="rounded-circle border-2 border-white position-relative bg-success d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px; margin-right: -15px; z-index: 3;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="rounded-circle border-2 border-white position-relative bg-primary d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px; margin-right: -15px; z-index: 2;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="rounded-circle border-2 border-white position-relative bg-warning d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px; margin-right: -15px; z-index: 1;">
+                            <i class="fas fa-user"></i>
+                        </div>
                     </div>
                     <div class="ms-4">
                         <div class="d-flex align-items-center mb-1">
@@ -109,7 +118,13 @@
             <div class="col-lg-6 position-relative d-none d-lg-block" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
                 <!-- Main hero image -->
                 <div class="position-relative rounded-4 overflow-hidden shadow-lg" style="height: 500px;">
-                    <img src="{% static 'media/products/farm-hero.jpg' %}" alt="Produkte të freskëta" class="w-100 h-100" style="object-fit: cover;">
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-success bg-opacity-10" style="background: linear-gradient(135deg, #e8f5e8 0%, #c3e6cb 100%);">
+                        <div class="text-center text-success">
+                            <i class="fas fa-leaf fa-5x mb-3"></i>
+                            <h3>Produkte të Freskëta nga Ferma</h3>
+                            <p>E freskët, e pastër, direkt nga fermerët tanë</p>
+                        </div>
+                    </div>
                     <!-- Floating elements -->
                     <div class="position-absolute start-0 bottom-0 m-4 bg-white p-3 rounded-3 shadow-sm d-flex align-items-center" style="backdrop-filter: blur(10px); background-color: rgba(255,255,255,0.9);" data-aos="fade-up" data-aos-delay="600">
                         <div class="bg-success text-white rounded-circle p-2 me-3">
@@ -123,7 +138,7 @@
                     <div class="position-absolute end-0 top-0 m-4 bg-white p-3 rounded-3 shadow-sm" style="backdrop-filter: blur(10px); background-color: rgba(255,255,255,0.9);" data-aos="fade-left" data-aos-delay="800">
                         <div class="d-flex align-items-center">
                             <div class="bg-success rounded-circle p-2 d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
-                                <img src="{% static 'media/products/organic-badge.svg' %}" alt="Certifikatë organike" class="w-100 h-100" style="object-fit: contain;">
+                                <i class="fas fa-leaf text-white"></i>
                             </div>
                             <div>
                                 <p class="mb-0 fw-bold">100% Organike</p>
@@ -344,73 +359,79 @@
             </div>
         </div>
 
-        <!-- Swiper slider për produktet -->
-        <div class="swiper products-slider" data-aos="fade-up" data-aos-delay="200">
-            <div class="swiper-wrapper pb-5">
-                {% for product in latest_products %}
-                <div class="swiper-slide">
-                    <div class="product-card h-100 bg-white rounded-4 shadow-sm overflow-hidden">
-                        <div class="product-image-wrapper position-relative">
-                            {% if product.images.exists %}
-                                <img src="{{ product.images.first.image.url }}" class="w-100" alt="{{ product.name }}" style="height: 240px; object-fit: cover; transition: var(--transition-slow);">
-                            {% else %}
-                                <img src="{% static 'images/product-placeholder.jpg' %}" class="w-100" alt="{{ product.name }}" style="height: 240px; object-fit: cover; transition: var(--transition-slow);">
-                            {% endif %}
-
-                            <!-- Overlay with quick actions -->
-                            <div class="product-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0,0,0,0.5); opacity: 0; transition: var(--transition-fast);">
-                                <a href="{% url 'product:detail' product.slug %}" class="btn btn-light btn-sm rounded-circle mx-1" data-bs-toggle="tooltip" title="Shiko Detajet">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="#" class="btn btn-light btn-sm rounded-circle mx-1" data-bs-toggle="tooltip" title="Shto në Shportë">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </a>
-                                <a href="#" class="btn btn-light btn-sm rounded-circle mx-1" data-bs-toggle="tooltip" title="Shto në Të Preferuarat">
-                                    <i class="far fa-heart"></i>
-                                </a>
+        <!-- Produktet në një grid të thjeshtë -->
+        <div class="row g-4" id="products-grid">
+            {% for product in latest_products %}
+            <div class="col-lg-4 col-md-6">
+                <div class="product-card h-100 bg-white rounded-4 shadow-sm overflow-hidden">
+                    <div class="product-image-wrapper position-relative">
+                        {% if product.images.exists %}
+                            <img src="{{ product.images.first.image.url }}" class="w-100" alt="{{ product.name }}" style="height: 240px; object-fit: cover; transition: var(--transition-slow);">
+                        {% else %}
+                            <div class="w-100 d-flex align-items-center justify-content-center bg-light" style="height: 240px;">
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-image fa-3x mb-2"></i>
+                                    <p class="mb-0 small">{{ product.name }}</p>
+                                </div>
                             </div>
+                        {% endif %}
 
-                            <!-- Top corner badges -->
-                            <div class="product-badges position-absolute top-0 start-0 p-3 d-flex flex-column gap-2">
-                                <span class="badge bg-success rounded-pill px-3 py-2 shadow-sm mb-1">I ri</span>
-                                {% if product.organic %}
-                                <span class="badge bg-warning text-dark rounded-pill px-3 py-2 shadow-sm">Bio</span>
-                                {% endif %}
-                            </div>
+                        <!-- Overlay with quick actions -->
+                        <div class="product-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0,0,0,0.5); opacity: 0; transition: var(--transition-fast);">
+                            <a href="{% url 'product:detail' product.slug %}" class="btn btn-light btn-sm rounded-circle mx-1" data-bs-toggle="tooltip" title="Shiko Detajet">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="#" class="btn btn-light btn-sm rounded-circle mx-1" data-bs-toggle="tooltip" title="Shto në Shportë">
+                                <i class="fas fa-shopping-cart"></i>
+                            </a>
+                            <a href="#" class="btn btn-light btn-sm rounded-circle mx-1" data-bs-toggle="tooltip" title="Shto në Të Preferuarat">
+                                <i class="far fa-heart"></i>
+                            </a>
                         </div>
 
-                        <div class="product-info p-4">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <h5 class="mb-0 fw-bold">{{ product.name }}</h5>
-                                    <div class="text-muted small">
-                                        <i class="fas fa-map-marker-alt me-1"></i> {{ product.farmer.location }}
-                                    </div>
+                        <!-- Top corner badges -->
+                        <div class="product-badges position-absolute top-0 start-0 p-3 d-flex flex-column gap-2">
+                            <span class="badge bg-success rounded-pill px-3 py-2 shadow-sm mb-1">I ri</span>
+                            {% if product.organic %}
+                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2 shadow-sm">Bio</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="product-info p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h5 class="mb-0 fw-bold">{{ product.name }}</h5>
+                                <div class="text-muted small">
+                                    <i class="fas fa-map-marker-alt me-1"></i> {{ product.farmer.location }}
                                 </div>
-                                <span class="price bg-success-subtle text-success fw-bold rounded-pill px-3 py-1">{{ product.price }} ALL</span>
                             </div>
+                            <span class="price bg-success-subtle text-success fw-bold rounded-pill px-3 py-1">{{ product.price }} ALL</span>
+                        </div>
 
-                            <div class="d-flex align-items-center mb-3">
-                                <i class="fas fa-user-circle me-2 text-muted"></i>
-                                <span class="small text-muted">{{ product.farmer.name }}</span>
-                            </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-user-circle me-2 text-muted"></i>
+                            <span class="small text-muted">{{ product.farmer.farm_name }}</span>
+                        </div>
 
-                            <p class="card-text text-muted mb-3 small">{{ product.description|truncatewords:15 }}</p>
+                        <p class="card-text text-muted mb-3 small">{{ product.description|truncatewords:15 }}</p>
 
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="unit text-muted small">{{ product.get_unit_display }}</span>
-                                <a href="{% url 'product:detail' product.slug %}" class="btn btn-outline-success btn-sm rounded-pill px-3">
-                                    Shiko detajet
-                                    <i class="fas fa-chevron-right ms-1"></i>
-                                </a>
-                            </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="unit text-muted small">{{ product.get_unit_display }}</span>
+                            <a href="{% url 'product:detail' product.slug %}" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                                Shiko detajet
+                                <i class="fas fa-chevron-right ms-1"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
-                {% empty %}
+            </div>
+            {% empty %}
                 <div class="col-12 text-center py-5">
                     <div class="empty-state p-5 rounded-4 bg-white shadow-sm">
-                        <img src="{% static 'images/empty-products.svg' %}" alt="Nuk ka produkte" class="img-fluid mb-4" style="max-width: 200px;">
+                        <div class="text-muted mb-4">
+                            <i class="fas fa-box-open fa-5x"></i>
+                        </div>
                         <h4 class="mb-3">Nuk ka produkte të disponueshme</h4>
                         <p class="text-muted mb-4">Produktet e reja do të shfaqen këtu sapo të shtohen nga fermerët tanë.</p>
                         <a href="{% url 'farmer:register' %}" class="btn btn-outline-success rounded-pill px-4 py-2">
@@ -418,12 +439,7 @@
                         </a>
                     </div>
                 </div>
-                {% endfor %}
-            </div>
-
-            <div class="swiper-pagination"></div>
-            <div class="swiper-button-next"></div>
-            <div class="swiper-button-prev"></div>
+            {% endfor %}
         </div>
 
         {% if latest_products %}
@@ -530,85 +546,87 @@
             </div>
         </div>
         
-        <div class="swiper testimonials-slider" data-aos="fade-up" data-aos-delay="200">
-            <div class="swiper-wrapper pb-5">
-                <div class="swiper-slide">
-                    <div class="testimonial-card bg-white rounded-4 shadow-sm p-5 position-relative">
-                        <div class="quote-icon position-absolute text-success opacity-10" style="top: 20px; right: 20px; font-size: 5rem;">
-                            <i class="fas fa-quote-right"></i>
-                        </div>
-                        <div class="d-flex mb-4">
-                            <div class="text-warning">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                        <p class="testimonial-text mb-5 lead">"Kjo platformë e ka ndryshuar plotësisht mënyrën se si unë bëj pazar. Produktet janë gjithmonë të freskëta, çmimet janë të drejta, dhe ndihem mirë duke ditur se po mbështes fermerët vendas."</p>
-                        <div class="d-flex align-items-center">
-<img src="{% static 'media/products/testimonial1.jpg' %}" alt="Andi Duro" class="rounded-circle me-4" style="width: 70px; height: 70px; object-fit: cover;">
-                            <div>
-                                <h5 class="fw-bold mb-1">Andi Duro</h5>
-                                <p class="text-muted mb-0">Tiranë, Blerës i Rregullt</p>
-                            </div>
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="testimonial-card bg-white rounded-4 shadow-sm p-5 position-relative">
+                    <div class="quote-icon position-absolute text-success opacity-10" style="top: 20px; right: 20px; font-size: 5rem;">
+                        <i class="fas fa-quote-right"></i>
+                    </div>
+                    <div class="d-flex mb-4">
+                        <div class="text-warning">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
                         </div>
                     </div>
-                </div>
-                
-                <div class="swiper-slide">
-                    <div class="testimonial-card bg-white rounded-4 shadow-sm p-5 position-relative">
-                        <div class="quote-icon position-absolute text-success opacity-10" style="top: 20px; right: 20px; font-size: 5rem;">
-                            <i class="fas fa-quote-right"></i>
+                    <p class="testimonial-text mb-5 lead">"Kjo platformë e ka ndryshuar plotësisht mënyrën se si unë bëj pazar. Produktet janë gjithmonë të freskëta, çmimet janë të drejta, dhe ndihem mirë duke ditur se po mbështes fermerët vendas."</p>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle me-4 bg-success d-flex align-items-center justify-content-center text-white" style="width: 70px; height: 70px;">
+                            <i class="fas fa-user fa-2x"></i>
                         </div>
-                        <div class="d-flex mb-4">
-                            <div class="text-warning">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                            </div>
-                        </div>
-                        <p class="testimonial-text mb-5 lead">"Si fermer, kjo platformë më ka ndihmuar të zgjeroj biznesin tim dhe të arrij klientë që kurrë nuk do të mund t'i takoja ndryshe. Procesi është i thjeshtë dhe pagesat janë gjithmonë të sakta."</p>
-                        <div class="d-flex align-items-center">
-<img src="{% static 'media/products/testimonial2.jpg' %}" alt="Elona Hyseni" class="rounded-circle me-4" style="width: 70px; height: 70px; object-fit: cover;">
-                            <div>
-                                <h5 class="fw-bold mb-1">Elona Hyseni</h5>
-                                <p class="text-muted mb-0">Korçë, Fermere</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="swiper-slide">
-                    <div class="testimonial-card bg-white rounded-4 shadow-sm p-5 position-relative">
-                        <div class="quote-icon position-absolute text-success opacity-10" style="top: 20px; right: 20px; font-size: 5rem;">
-                            <i class="fas fa-quote-right"></i>
-                        </div>
-                        <div class="d-flex mb-4">
-                            <div class="text-warning">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                        <p class="testimonial-text mb-5 lead">"Jam kujdestar i një restoranti të vogël dhe blej të gjitha perimet dhe frutat nga kjo platformë. Cilësia e produkteve ka përmirësuar shijen e gatimeve tona dhe klientët tanë e vërejnë ndryshimin!"</p>
-                        <div class="d-flex align-items-center">
-<img src="{% static 'media/products/testimonial3.jpg' %}" alt="Dritan Brahimaj" class="rounded-circle me-4" style="width: 70px; height: 70px; object-fit: cover;">
-                            <div>
-                                <h5 class="fw-bold mb-1">Dritan Brahimaj</h5>
-                                <p class="text-muted mb-0">Vlorë, Pronar Restoranti</p>
-                            </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">Andi Duro</h5>
+                            <p class="text-muted mb-0">Tiranë, Blerës i Rregullt</p>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div class="swiper-pagination"></div>
+            <div class="col-lg-4">
+                <div class="testimonial-card bg-white rounded-4 shadow-sm p-5 position-relative">
+                    <div class="quote-icon position-absolute text-success opacity-10" style="top: 20px; right: 20px; font-size: 5rem;">
+                        <i class="fas fa-quote-right"></i>
+                    </div>
+                    <div class="d-flex mb-4">
+                        <div class="text-warning">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                    </div>
+                    <p class="testimonial-text mb-5 lead">"Si fermer, kjo platformë më ka ndihmuar të zgjeroj biznesin tim dhe të arrij klientë që kurrë nuk do të mund t'i takoja ndryshe. Procesi është i thjeshtë dhe pagesat janë gjithmonë të sakta."</p>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle me-4 bg-primary d-flex align-items-center justify-content-center text-white" style="width: 70px; height: 70px;">
+                            <i class="fas fa-user fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">Elona Hyseni</h5>
+                            <p class="text-muted mb-0">Korçë, Fermere</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="testimonial-card bg-white rounded-4 shadow-sm p-5 position-relative">
+                    <div class="quote-icon position-absolute text-success opacity-10" style="top: 20px; right: 20px; font-size: 5rem;">
+                        <i class="fas fa-quote-right"></i>
+                    </div>
+                    <div class="d-flex mb-4">
+                        <div class="text-warning">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="testimonial-text mb-5 lead">"Jam kujdestar i një restoranti të vogël dhe blej të gjitha perimet dhe frutat nga kjo platformë. Cilësia e produkteve ka përmirësuar shijen e gatimeve tona dhe klientët tanë e vërejnë ndryshimin!"</p>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle me-4 bg-warning d-flex align-items-center justify-content-center text-white" style="width: 70px; height: 70px;">
+                            <i class="fas fa-user fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">Dritan Brahimaj</h5>
+                            <p class="text-muted mb-0">Vlorë, Pronar Restoranti</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>
@@ -629,7 +647,13 @@
         <div class="row align-items-center" data-aos="fade-up" data-aos-delay="200">
             <div class="col-lg-6 mb-4 mb-lg-0">
                 <div class="farmer-image position-relative rounded-4 overflow-hidden shadow-lg" style="height: 500px;">
-<img src="{% static 'media/products/farmer-hero.jpg' %}" alt="Familja Fermere" class="w-100 h-100" style="object-fit: cover;">
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #198754 0%, #146c43 100%);">
+                        <div class="text-center text-white">
+                            <i class="fas fa-tractor fa-5x mb-3"></i>
+                            <h3>Familja Fermere</h3>
+                            <p>Prodhues të përkushtuar që nga viti 1995</p>
+                        </div>
+                    </div>
                     <div class="farmer-overlay position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 50%);"></div>
                     <div class="farmer-caption position-absolute bottom-0 start-0 p-4 text-white">
                         <h4 class="fw-bold mb-2">Familja Marku</h4>
@@ -804,11 +828,19 @@
             
             <div class="col-lg-5 d-none d-lg-block" data-aos="fade-left">
                 <div class="cta-image position-relative">
-<img src="{% static 'media/products/fresh-basket.png' %}" alt="Shporta me produkte të freskëta" class="img-fluid rounded-4 shadow-lg">
+                    <div class="rounded-4 shadow-lg d-flex align-items-center justify-content-center bg-light" style="height: 400px;">
+                        <div class="text-center text-success">
+                            <i class="fas fa-shopping-basket fa-5x mb-3"></i>
+                            <h3>Shporta me Produkte të Freskëta</h3>
+                            <p>Direkt nga ferma në shtëpinë tuaj</p>
+                        </div>
+                    </div>
                     <div class="position-absolute start-0 bottom-0 p-4 bg-white rounded-4 shadow-lg transform-hover" style="width: 220px; margin-left: -30px; margin-bottom: -20px;">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0 me-3">
-<img src="{% static 'media/products/discount-icon.svg' %}" alt="Zbritje" style="width: 40px; height: 40px;">
+                                <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fas fa-percent text-white"></i>
+                                </div>
                             </div>
                             <div>
                                 <h5 class="text-success fw-bold mb-0">20% ZBRITJE</h5>
@@ -823,55 +855,14 @@
 </section>
 
 <!-- JavaScript për funksionalitetin -->
+{% endblock %}
+
+{% block extra_js %}
 <script>
-    // Inicializimi i AOS (Animate on Scroll)
+    // Inicializimi kur faqja ngarkohet
     document.addEventListener('DOMContentLoaded', function() {
-        AOS.init({
-            duration: 800,
-            easing: 'ease-in-out',
-            once: true
-        });
         
-        // Inicializimi i Swiper për produktet
-        const productsSwiper = new Swiper('.products-slider', {
-            slidesPerView: 1,
-            spaceBetween: 20,
-            loop: true,
-            pagination: {
-                el: '.products-slider .swiper-pagination',
-                clickable: true
-            },
-            navigation: {
-                nextEl: '.products-slider .swiper-button-next',
-                prevEl: '.products-slider .swiper-button-prev'
-            },
-            breakpoints: {
-                640: {
-                    slidesPerView: 2
-                },
-                992: {
-                    slidesPerView: 3
-                }
-            }
-        });
-        
-        // Inicializimi i Swiper për testimonialet
-        const testimonialsSwiper = new Swiper('.testimonials-slider', {
-            slidesPerView: 1,
-            spaceBetween: 30,
-            loop: true,
-            pagination: {
-                el: '.testimonials-slider .swiper-pagination',
-                clickable: true
-            },
-            breakpoints: {
-                768: {
-                    slidesPerView: 2
-                }
-            }
-        });
-        
-        // Animacionet e numëratorëve në statistikat
+        // Animacioni i numëratorëve në statistikat
         const counters = document.querySelectorAll('.counter');
         const speed = 200; // Sa më i ulët, aq më shpejt
         
@@ -902,18 +893,38 @@
             observer.observe(counter);
         });
         
-        // Efekti hover për butonat me gradient
-        document.querySelectorAll('.btn[style*="gradient"]').forEach(button => {
-            button.addEventListener('mouseenter', function() {
-                this.querySelector('.z-1').style.transform = 'translateX(0)';
-            });
-            
-            button.addEventListener('mouseleave', function() {
-                this.querySelector('.z-1').style.transform = 'translateX(-100%)';
-            });
-        });
+        // Slider i thjeshtë për produktet
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.swiper-slide');
+        const totalSlides = slides.length;
         
-        // Aktivizimi i tooltips për kartat e produkteve
+        if (totalSlides > 0) {
+            // Fshih të gjitha slides
+            slides.forEach(slide => slide.style.display = 'none');
+            
+            // Trego 3 slides në të njëjtën kohë
+            function showSlides() {
+                slides.forEach(slide => slide.style.display = 'none');
+                
+                for (let i = 0; i < Math.min(3, totalSlides); i++) {
+                    const slideIndex = (currentSlide + i) % totalSlides;
+                    if (slides[slideIndex]) {
+                        slides[slideIndex].style.display = 'block';
+                        slides[slideIndex].style.width = '33.333%';
+                        slides[slideIndex].style.display = 'inline-block';
+                    }
+                }
+            }
+            
+            // Auto-slide çdo 5 sekonda
+            showSlides();
+            setInterval(() => {
+                currentSlide = (currentSlide + 1) % totalSlides;
+                showSlides();
+            }, 5000);
+        }
+        
+        // Aktivizimi i tooltips
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
@@ -922,27 +933,54 @@
         // Efekti hover për kartat e produkteve
         document.querySelectorAll('.product-card').forEach(card => {
             card.addEventListener('mouseenter', function() {
-                this.querySelector('.product-overlay').style.opacity = '1';
+                const overlay = this.querySelector('.product-overlay');
+                if (overlay) {
+                    overlay.style.opacity = '1';
+                }
             });
             
             card.addEventListener('mouseleave', function() {
-                this.querySelector('.product-overlay').style.opacity = '0';
+                const overlay = this.querySelector('.product-overlay');
+                if (overlay) {
+                    overlay.style.opacity = '0';
+                }
             });
         });
         
-        // Animacioni i shfaqjes për elementët
-        const revealItems = document.querySelectorAll('.reveal-item');
-        
-        const revealObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('is-visible');
+        // Smooth scroll për anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
                 }
             });
-        }, { threshold: 0.1 });
+        });
         
-        revealItems.forEach(item => {
-            revealObserver.observe(item);
+        // Simple fade-in animation për elementët
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        // Apliko animacionin në elementët kryesorë
+        document.querySelectorAll('.feature-card, .testimonial-card, .stat-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
         });
     });
 </script>

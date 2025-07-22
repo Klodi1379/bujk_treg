@@ -14,6 +14,7 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('register/', views.register_farmer, name='register'), # Ensure this points to register_farmer
     path('dashboard/', views.farmer_dashboard, name='dashboard'),
+    path('smart-dashboard/', views.smart_dashboard, name='smart_dashboard'),
     path('profile/<int:pk>/', views.FarmerProfileDetailView.as_view(), name='profile_detail'),
     path('profile/<int:pk>/update/', views.FarmerProfileUpdateView.as_view(), name='profile_update'),
     path('location/update/', views.update_location, name='update_location'),

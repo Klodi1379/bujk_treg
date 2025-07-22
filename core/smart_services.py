@@ -11,9 +11,9 @@ import json
 import requests
 from decimal import Decimal
 
-from .models import Product, FarmerProfile
+from product.models import Product, Category
+from farmer.models import FarmerProfile, Crop, ProductionLog
 from marketplace.models import Order, OrderItem
-from farmer.models import ProductionLog, Crop
 
 
 class PriceIntelligenceService:

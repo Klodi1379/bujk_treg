@@ -290,3 +290,20 @@ def toggle_product_feature(request, slug):
         'status': 'success',
         'is_featured': product.is_featured
     })
+
+@login_required
+def manage_products(request):
+    """Pamja për menaxhimin e produkteve të fermerit"""
+    if not hasattr(request.user, 'farmer_profile'):
+        messages.error(request, 'Vetëm fermerët mund të aksesojnë këtë faqe.')
+        return redirect('farmer:register')
+    
+    # Marrja e produkteve të fermerit
+    products = Product.objects.filter(farmer=request.user.farmer_profile).order_by('-created_at')
+    
+    context = {
+        'products': products,
+        'farmer': request.user.farmer_profile,
+    }
+    
+    return render(request, 'product/manage_products.html', context)

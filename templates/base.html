@@ -29,104 +29,239 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
+                    <!-- Katalogu për të gjithë -->
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'product:list' %}">{% trans "Katalogu" %}</a>
+                        <a class="nav-link" href="{% url 'product:list' %}">
+                            <i class="fas fa-store me-1"></i>{% trans "Katalogu" %}
+                        </a>
                     </li>
+
                     {% if user.is_authenticated %}
                         {% if user.farmer_profile %}
+                            <!-- Fermer Navigation -->
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'farmer:dashboard' %}">{% trans "Paneli" %}</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'product:manage_products' %}">{% trans "Produktet e Mia" %}</a>
-                            </li>
-                        {% else %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'marketplace:order_list' %}">{% trans "Porositë e Mia" %}</a>
-                            </li>
-                        {% endif %}
-                    {% else %}
-                         <li class="nav-item">
-                                <a class="nav-link" href="{% url 'marketplace:order_list' %}">{% trans "Porositë e Mia" %}</a>
-                            </li>
-                    {% endif %}
-                </ul>
-                 <ul class="navbar-nav">
-                    
-                    {% if user.is_authenticated %}
-                        {% if not user.farmer_profile %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'marketplace:cart' %}">
-                                    <i class="fas fa-shopping-cart"></i>
-                                    <span class="badge bg-light text-dark">
-                                        {{ request.session.cart|default:0 }}
-                                    </span>
+                                <a class="nav-link" href="{% url 'farmer:dashboard' %}">
+                                    <i class="fas fa-tachometer-alt me-1"></i>{% trans "Paneli" %}
                                 </a>
                             </li>
-                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'marketplace:order_list' %}">{% trans "Porositë e Mia" %}</a>
+                            
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="farmerDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-seedling me-1"></i>{% trans "Bujqësia" %}
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><h6 class="dropdown-header">{% trans "Menaxhimi i Fermës" %}</h6></li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'farmer:manage_crops' %}">
+                                            <i class="fas fa-seedling me-2"></i>{% trans "Kulturat e Mia" %}
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'farmer:production_logs' %}">
+                                            <i class="fas fa-clipboard-list me-2"></i>{% trans "Ditarët e Prodhimit" %}
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'farmer:add_certification' %}">
+                                            <i class="fas fa-certificate me-2"></i>{% trans "Certifikimet" %}
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header">{% trans "Produktet" %}</h6></li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'product:manage_products' %}">
+                                            <i class="fas fa-boxes me-2"></i>{% trans "Produktet e Mia" %}
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'product:add' %}">
+                                            <i class="fas fa-plus me-2"></i>{% trans "Shto Produkt" %}
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'marketplace:seller_orders' %}">
+                                            <i class="fas fa-shopping-bag me-2"></i>{% trans "Porositë e Ardhura" %}
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="smartServicesDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-brain me-1"></i>{% trans "Shërbime Inteligjente" %}
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'farmer:smart_dashboard' %}">
+                                            <i class="fas fa-brain me-2"></i>{% trans "Dashboard Inteligjent" %}
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'core:weather_dashboard' %}">
+                                            <i class="fas fa-cloud-sun me-2"></i>{% trans "Dashboard i Motit" %}
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'core:market_insights' %}">
+                                            <i class="fas fa-chart-line me-2"></i>{% trans "Analiza e Tregut" %}
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        {% else %}
+                            <!-- Blerës Navigation -->
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'marketplace:order_list' %}">
+                                    <i class="fas fa-shopping-bag me-1"></i>{% trans "Porositë e Mia" %}
+                                </a>
                             </li>
                         {% endif %}
-                         <li class="nav-item dropdown">
+
+                        <!-- Logistics për të gjithë përdoruesit e regjistruar -->
+                        <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="logisticsDropdown" role="button" data-bs-toggle="dropdown">
-                                {% trans "Logistics" %}
+                                <i class="fas fa-truck me-1"></i>{% trans "Logjistika" %}
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                 <li>
-                                    <a class="dropdown-item" href="{% url 'logistics:shipment_list' %}">{% trans "Shipments" %}</a>
+                            <ul class="dropdown-menu">
+                                <li><h6 class="dropdown-header">{% trans "Transporti" %}</h6></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'logistics:shipment_list' %}">
+                                        <i class="fas fa-shipping-fast me-2"></i>{% trans "Dërgesat" %}
+                                    </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'logistics:warehouse_list' %}">{% trans "Warehouses" %}</a>
+                                    <a class="dropdown-item" href="{% url 'logistics:track_shipment' %}">
+                                        <i class="fas fa-search-location me-2"></i>{% trans "Gjurmo Dërgesën" %}
+                                    </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'logistics:vehicle_list' %}">{% trans "Vehicles" %}</a>
+                                    <a class="dropdown-item" href="{% url 'logistics:driver_list' %}">
+                                        <i class="fas fa-user-tie me-2"></i>{% trans "Shoferët" %}
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header">{% trans "Infrastruktura" %}</h6></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'logistics:warehouse_list' %}">
+                                        <i class="fas fa-warehouse me-2"></i>{% trans "Magazinat" %}
+                                    </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'logistics:transport_company_list' %}">{% trans "Transport Companies" %}</a>
+                                    <a class="dropdown-item" href="{% url 'logistics:vehicle_list' %}">
+                                        <i class="fas fa-truck me-2"></i>{% trans "Automjetet" %}
+                                    </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'logistics:driver_list' %}">{% trans "Drivers" %}</a>
+                                    <a class="dropdown-item" href="{% url 'logistics:transport_company_list' %}">
+                                        <i class="fas fa-building me-2"></i>{% trans "Kompanitë e Transportit" %}
+                                    </a>
                                 </li>
                             </ul>
                         </li>
+                    {% endif %}
+                </ul>
+
+                <!-- Right side navigation -->
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <!-- Shopping Cart for non-farmers -->
+                        {% if not user.farmer_profile %}
+                            <li class="nav-item">
+                                <a class="nav-link position-relative" href="{% url 'marketplace:cart' %}">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark">
+                                        <span id="cart-count">{{ request.session.cart_count|default:0 }}</span>
+                                    </span>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <!-- User Profile Dropdown -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-user me-1"></i>{{ user.get_full_name|default:user.username }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    {% if user.is_authenticated and user.farmer_profile %}
+                                {% if user.farmer_profile %}
+                                    <li>
                                         <a class="dropdown-item" href="{% url 'farmer:profile_detail' pk=user.farmer_profile.pk %}">
-                                            <i class="fas fa-id-card me-2"></i>{% trans "Profili" %}
+                                            <i class="fas fa-id-card me-2"></i>{% trans "Profili im" %}
                                         </a>
-                                    {% else %}
-                                         <a class="dropdown-item" href="#">
-                                            <i class="fas fa-id-card me-2"></i>{% trans "Profili" %}
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'farmer:profile_update' pk=user.farmer_profile.pk %}">
+                                            <i class="fas fa-edit me-2"></i>{% trans "Përditëso Profilin" %}
                                         </a>
-                                    {% endif %}
-                                </li>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'farmer:update_location' %}">
+                                            <i class="fas fa-map-marker-alt me-2"></i>{% trans "Përditëso Vendndodhjen" %}
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'marketplace:seller_dashboard' %}">
+                                            <i class="fas fa-chart-bar me-2"></i>{% trans "Dashboard Shitës" %}
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="fas fa-id-card me-2"></i>{% trans "Profili im" %}
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'farmer:register' %}">
+                                            <i class="fas fa-user-plus me-2"></i>{% trans "Bëhu Fermer" %}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                {% if user.is_staff %}
+                                    <li>
+                                        <a class="dropdown-item" href="/admin/" target="_blank">
+                                            <i class="fas fa-cogs me-2"></i>{% trans "Administrimi" %}
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                {% endif %}
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'logout' %}">
+                                    <a class="dropdown-item text-danger" href="{% url 'logout' %}">
                                         <i class="fas fa-sign-out-alt me-2"></i>{% trans "Dilni" %}
                                     </a>
                                 </li>
                             </ul>
                         </li>
-                         <li class="nav-item dropdown">
+
+                        <!-- Language Dropdown -->
+                        <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown">
-                                 {% trans "Gjuha" %}
+                                <i class="fas fa-globe me-1"></i>{% trans "Gjuha" %}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="/en/">English</a></li>
-                                <li><a class="dropdown-item" href="/sq/">Shqip</a></li>
+                                <li>
+                                    <a class="dropdown-item" href="/sq{{ request.get_full_path|slice:'3:' }}">
+                                        <i class="fas fa-flag me-2"></i>Shqip
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/en{{ request.get_full_path|slice:'3:' }}">
+                                        <i class="fas fa-flag me-2"></i>English
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                     {% else %}
+                        <!-- Authentication Links for Non-authenticated Users -->
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'farmer:login' %}">{% trans "Identifikohuni" %}</a>
+                            <a class="nav-link" href="{% url 'farmer:login' %}">
+                                <i class="fas fa-sign-in-alt me-1"></i>{% trans "Identifikohuni" %}
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'farmer:register' %}">{% trans "Regjistrohuni" %}</a>
+                            <a class="nav-link" href="{% url 'farmer:register' %}">
+                                <i class="fas fa-user-plus me-1"></i>{% trans "Regjistrohuni" %}
+                            </a>
                         </li>
                     {% endif %}
                 </ul>
@@ -185,6 +320,166 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Enhanced Navbar JavaScript -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Highlight active navigation item
+        const currentPath = window.location.pathname;
+        const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+        
+        navLinks.forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+            }
+        });
+        
+        // Smooth dropdown animations
+        const dropdowns = document.querySelectorAll('.dropdown');
+        dropdowns.forEach(dropdown => {
+            const toggle = dropdown.querySelector('.dropdown-toggle');
+            const menu = dropdown.querySelector('.dropdown-menu');
+            
+            if (toggle && menu) {
+                toggle.addEventListener('click', function(e) {
+                    // Add loading state
+                    this.classList.add('nav-loading');
+                    setTimeout(() => {
+                        this.classList.remove('nav-loading');
+                    }, 300);
+                });
+            }
+        });
+        
+        // Cart count auto-update (if cart exists)
+        function updateCartCount() {
+            fetch('/sq/marketplace/api/cart/count/')
+                .then(response => response.json())
+                .then(data => {
+                    const cartCount = document.getElementById('cart-count');
+                    if (cartCount && data.count !== undefined) {
+                        cartCount.textContent = data.count;
+                        if (data.count > 0) {
+                            cartCount.parentElement.style.display = 'inline-block';
+                        } else {
+                            cartCount.parentElement.style.display = 'none';
+                        }
+                    }
+                })
+                .catch(error => console.log('Cart count update failed:', error));
+        }
+        
+        // Update cart count on page load
+        updateCartCount();
+        
+        // Update cart count every 30 seconds
+        setInterval(updateCartCount, 30000);
+        
+        // Add click tracking for analytics
+        document.querySelectorAll('.navbar-nav .nav-link, .dropdown-item').forEach(link => {
+            link.addEventListener('click', function() {
+                // Track navigation clicks (you can send to analytics service)
+                console.log('Navigation clicked:', this.textContent.trim(), this.href);
+            });
+        });
+        
+        // Mobile menu improvements
+        const navbarToggler = document.querySelector('.navbar-toggler');
+        const navbarCollapse = document.querySelector('.navbar-collapse');
+        
+        if (navbarToggler && navbarCollapse) {
+            // Close mobile menu when clicking on a link
+            document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth < 992) {
+                        const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+                            toggle: false
+                        });
+                        bsCollapse.hide();
+                    }
+                });
+            });
+            
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (window.innerWidth < 992 && 
+                    !navbarCollapse.contains(e.target) && 
+                    !navbarToggler.contains(e.target) &&
+                    navbarCollapse.classList.contains('show')) {
+                    
+                    const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+                        toggle: false
+                    });
+                    bsCollapse.hide();
+                }
+            });
+        }
+        
+        // Language switcher enhancement
+        const languageLinks = document.querySelectorAll('#languageDropdown + .dropdown-menu .dropdown-item');
+        languageLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Show loading state
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>' + this.textContent;
+            });
+        });
+        
+        // Search functionality (if search box exists)
+        const searchInput = document.querySelector('.navbar-search');
+        if (searchInput) {
+            let searchTimeout;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    // Implement search suggestions
+                    console.log('Search query:', this.value);
+                }, 300);
+            });
+        }
+        
+        // Notification badge animation
+        const badges = document.querySelectorAll('.navbar .badge');
+        badges.forEach(badge => {
+            if (parseInt(badge.textContent) > 0) {
+                badge.style.animation = 'pulse 2s infinite';
+            }
+        });
+    });
+    
+    // Utility functions for navbar
+    window.NavbarUtils = {
+        updateCartCount: function(count) {
+            const cartCount = document.getElementById('cart-count');
+            if (cartCount) {
+                cartCount.textContent = count;
+                if (count > 0) {
+                    cartCount.parentElement.style.display = 'inline-block';
+                } else {
+                    cartCount.parentElement.style.display = 'none';
+                }
+            }
+        },
+        
+        showNotification: function(message, type = 'success') {
+            // Create a notification in the navbar area
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 70px; right: 20px; z-index: 9999; max-width: 300px;';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(notification);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+    };
+    </script>
     
     <!-- Custom JS -->
     {% block extra_js %}{% endblock %}

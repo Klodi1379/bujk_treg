@@ -32,6 +32,13 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_extensions',
     
+    # Security apps
+    'axes',  # Login attempt tracking
+    # 'django_ratelimit',  # Rate limiting - temporarily disabled for development
+    'health_check',  # Health check endpoints
+    'health_check.db',  # Database health check
+    'health_check.cache',  # Cache health check
+    
     # Local apps
     'farmer',
     'product',
@@ -44,6 +51,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  # For static files
+    'axes.middleware.AxesMiddleware',  # Login attempt tracking
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
